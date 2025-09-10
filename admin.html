@@ -217,15 +217,44 @@ function setupDropZone(dropId,fileId,previewId){
   setupDropZone(id+'DropZone',id+'File',previewId);
 });
 
-// Upload Files
-async function uploadFile(file, folder){
-  if(!file) return null;
-  const ext=file.name.split('.').pop();
-  const fileName=`${folder}/${Date.now()}.${ext}`;
-  const { error } = await client.storage.from('uploads').upload(fileName, file);
-  if(error){ alert(error.message); return null; }
-  const { data } = client.storage.from('uploads').getPublicUrl(fileName);
-  return data.publicUrl;
+// Handle Save for all sections
+async function handleSave(section) {
+  const form = document.getElementById(section + "Form");
+  const formData = new FormData(form);
+  let newItem = {};
+
+  // Common fields
+  if (formData.get("title")) newItem.title = formData.get("title");
+  if (formData.get("description")) newItem.description = formData.get("description");
+
+  // Handle file upload
+  const fileInput = form.querySelector("input[type='file']");
+  if (fileInput && fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    let folder = section;
+
+    // Special case for pdf section
+    if (section === "pdf") folder = "pdfs";
+
+    const fileUrl = await uploadFile(file, folder);
+    if (fileUrl) {
+      if (section === "pdf") {
+        newItem.file_url = fileUrl; // ✅ Save PDF link
+      } else {
+        newItem.image_url = fileUrl; // ✅ For images/videos
+      }
+    }
+  }
+
+  // Save to Supabase
+  const { error } = await client.from(section).insert([newItem]);
+  if (error) {
+    alert("Error saving: " + error.message);
+  } else {
+    alert("Saved successfully!");
+    form.reset();
+    loadItems(section); // Refresh
+  }
 }
 
 // Save / Edit
