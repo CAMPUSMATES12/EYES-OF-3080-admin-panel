@@ -67,6 +67,7 @@ button.save-btn:hover { background:#0a5a2b; }
   <button onclick="openTab('marketplace')">Marketplace</button>
   <button onclick="openTab('pdfs')">PDFs</button>
   <button onclick="openTab('history')">History</button>
+  <button onclick="openTab('maintenance')">Maintenance</button>
 </nav>
 
 <main>
@@ -160,6 +161,19 @@ button.save-btn:hover { background:#0a5a2b; }
     <h2>History Log</h2>
     <ul id="historyList"></ul>
   </div>
+
+  <!-- MAINTENANCE -->
+  <div id="maintenance" class="tab-content">
+    <h2>Maintenance Mode</h2>
+    <form id="maintenanceForm">
+      <label>
+        <input type="checkbox" id="maintenanceToggle">
+        Enable Maintenance Mode
+      </label>
+      <br><br>
+      <button type="submit" class="save-btn">Save</button>
+    </form>
+  </div>
 </main>
 
 <!-- Popup -->
@@ -184,7 +198,9 @@ function openTab(tabId){
   document.getElementById(tabId).classList.add('active');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.querySelector(`nav button[onclick="openTab('${tabId}')"]`).classList.add('active');
+
   if(tabId === "history") loadHistory();
+  if(tabId === "maintenance") loadMaintenance();
 }
 
 // Drop Zones
@@ -217,51 +233,11 @@ function setupDropZone(dropId,fileId,previewId){
   setupDropZone(id+'DropZone',id+'File',previewId);
 });
 
-// Handle Save for all sections
-async function handleSave(section) {
-  const form = document.getElementById(section + "Form");
-  const formData = new FormData(form);
-  let newItem = {};
-
-  // Common fields
-  if (formData.get("title")) newItem.title = formData.get("title");
-  if (formData.get("description")) newItem.description = formData.get("description");
-
-  // Handle file upload
-  const fileInput = form.querySelector("input[type='file']");
-  if (fileInput && fileInput.files.length > 0) {
-    const file = fileInput.files[0];
-    let folder = section;
-
-    // Special case for pdf section
-    if (section === "pdf") folder = "pdfs";
-
-    const fileUrl = await uploadFile(file, folder);
-    if (fileUrl) {
-      if (section === "pdf") {
-        newItem.file_url = fileUrl; // ✅ Save PDF link
-      } else {
-        newItem.image_url = fileUrl; // ✅ For images/videos
-      }
-    }
-  }
-
-  // Save to Supabase
-  const { error } = await client.from(section).insert([newItem]);
-  if (error) {
-    alert("Error saving: " + error.message);
-  } else {
-    alert("Saved successfully!");
-    form.reset();
-    loadItems(section); // Refresh
-  }
-}
-
 // Save / Edit
 async function handleSave(section){
   const form=document.getElementById(section+'Form');
   const id=document.getElementById(section+'Id').value;
-  const title=document.getElementById(section+'Title').value;
+  const title=document.getElementById(section+'Title')?.value || '';
   const content=document.getElementById(section+'Content')?.value || '';
   const date=document.getElementById(section+'Date')?.value || null;
   const fileInput=document.getElementById(section+'File');
@@ -329,45 +305,18 @@ async function deleteItem(section,id,title){
   showPopup("🗑️ Deleted successfully!");
 }
 
-// =============================
-// ✅ HISTORY LOG FUNCTIONS
-// =============================
-
-// Log an action (add, update, delete)
+// ✅ HISTORY FUNCTIONS
 async function logHistory(section, action, title) {
-  const { error } = await client.from("history").insert([
-    { section, action, title } // timestamp is auto-filled in Supabase
-  ]);
-  if (error) {
-    console.error("❌ History log failed:", error.message);
-    showPopup("⚠️ History log failed!");
-  } else {
-    console.log("✅ History saved:", { section, action, title });
-  }
+  await client.from("history").insert([{ section, action, title }]);
 }
-
-// Load history into the admin panel
 async function loadHistory() {
   const list = document.getElementById("historyList");
-  const { data, error } = await client
-    .from("history")
-    .select("*")
-    .order("id", { ascending: false })
-    .limit(50);
-
+  const { data } = await client.from("history").select("*").order("id", { ascending: false }).limit(50);
   list.innerHTML = "";
-
-  if (error) {
-    console.error("❌ Failed to load history:", error.message);
-    list.innerHTML = "<li>⚠️ Failed to load history</li>";
-    return;
-  }
-
   if (!data || data.length === 0) {
     list.innerHTML = "<li>No history yet...</li>";
     return;
   }
-
   data.forEach(h => {
     const li = document.createElement("li");
     li.textContent = `${new Date(h.timestamp).toLocaleString()} → ${h.action.toUpperCase()} "${h.title}" in ${h.section}`;
@@ -375,8 +324,20 @@ async function loadHistory() {
   });
 }
 
+// ✅ MAINTENANCE FUNCTIONS
+async function loadMaintenance() {
+  const { data } = await client.from("settings").select("maintenance_mode").eq("id",1).single();
+  if (data) document.getElementById("maintenanceToggle").checked = data.maintenance_mode;
+}
+document.getElementById("maintenanceForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const mode = document.getElementById("maintenanceToggle").checked;
+  await client.from("settings").upsert({ id: 1, maintenance_mode: mode });
+  showPopup("⚡ Maintenance mode updated!");
+});
+
 // Attach
-['home','campus','academic_updates','market','pdf'].forEach(section=>{
+['home','campus','academic','market','pdf'].forEach(section=>{
   document.getElementById(section+'Form').addEventListener('submit',e=>{
     e.preventDefault();
     handleSave(section);
