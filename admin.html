@@ -1,363 +1,351 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EYES OF 3080 Admin Panel</title>
-<link rel="icon" type="image/png" href="https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-body { background:#f1fdf5; color:#0a5a2b; }
-header { display:flex; align-items:center; justify-content:center; padding:15px 20px; background:#0a5a2b; color:#fff; }
-header img { height:50px; border-radius:50%; margin-right:10px; }
-header h1 { font-size:1.5rem; }
-nav { display:flex; justify-content:center; margin:20px 0; flex-wrap:wrap; }
-nav button { background:#33cc99; color:#fff; padding:10px 20px; border:none; margin:5px; border-radius:50px; cursor:pointer; transition:0.3s; }
-nav button.active, nav button:hover { background:#0a5a2b; }
-main { max-width:900px; margin:0 auto; padding:20px; }
-.tab-content { display:none; }
-.tab-content.active { display:block; }
-form { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:30px; position:relative; }
-input, textarea { width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
-button.save-btn { background:#33cc99; color:#fff; padding:12px 20px; border:none; border-radius:50px; cursor:pointer; transition:0.3s; }
-button.save-btn:hover { background:#0a5a2b; }
-.item-list { margin-top:20px; }
-.item { background:#fff; padding:20px; margin:10px 0; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
-.item-actions button { margin-left:10px; padding:8px 16px; border:none; border-radius:50px; cursor:pointer; font-weight:600; }
-.item-actions .edit-btn { background:#33cc99; color:#fff; }
-.item-actions .delete-btn { background:#ff4d4d; color:#fff; }
-.file-preview { margin:10px 0; max-height:200px; border-radius:8px; object-fit:cover; display:block; }
-.drop-zone { padding:20px; border:2px dashed #0a5a2b; border-radius:12px; text-align:center; color:#666; margin:10px 0; cursor:pointer; position:relative; }
-.drop-zone.dragover { background:rgba(0,90,43,0.1); border-color:#155e36; color:#0a5a2b; }
-.drop-zone input[type=file] { position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; }
-
-#popupMessage {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #0a5a2b;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: all 0.4s ease;
-  z-index: 9999;
-}
-#popupMessage.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-</style>
-<script src="https://unpkg.com/@supabase/supabase-js"></script>
-</head>
-<body>
-
-<header>
-  <img src="https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo" alt="Logo">
-  <h1>EYES OF 3080 Admin Panel</h1>
-</header>
-
-<nav>
-  <button onclick="openTab('home')" class="active">Home</button>
-  <button onclick="openTab('campus')">Campus Gist</button>
-  <button onclick="openTab('academic')">Academic Updates</button>
-  <button onclick="openTab('marketplace')">Marketplace</button>
-  <button onclick="openTab('pdfs')">PDFs</button>
-  <button onclick="openTab('history')">History</button>
-  <button onclick="openTab('maintenance')">Maintenance</button>
-</nav>
-
-<main>
-  <!-- HOME -->
-  <div id="home" class="tab-content active">
-    <h2>Manage Home Content</h2>
-    <form id="homeForm">
-      <input type="hidden" id="homeId">
-      <input type="text" id="homeTitle" placeholder="Title" required>
-      <textarea id="homeContent" placeholder="Content" rows="4" required></textarea>
-      <input type="date" id="homeDate" required>
-      <div class="drop-zone" id="homeDropZone">
-        Drag & drop an image or click to select
-        <input type="file" id="homeFile">
-      </div>
-      <img id="homePreview" class="file-preview" src="" alt="">
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="homeList"></div>
-  </div>
-
-  <!-- CAMPUS -->
-  <div id="campus" class="tab-content">
-    <h2>Manage Campus Gist</h2>
-    <form id="campusForm">
-      <input type="hidden" id="campusId">
-      <input type="text" id="campusTitle" placeholder="Title" required>
-      <textarea id="campusContent" placeholder="Content" rows="4" required></textarea>
-      <div class="drop-zone" id="campusDropZone">
-        Drag & drop an image or click to select
-        <input type="file" id="campusFile">
-      </div>
-      <img id="campusPreview" class="file-preview" src="" alt="">
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="campusList"></div>
-  </div>
-
-  <!-- ACADEMIC -->
-  <div id="academic" class="tab-content">
-    <h2>Manage Academic Updates</h2>
-    <form id="academicForm">
-      <input type="hidden" id="academicId">
-      <input type="text" id="academicTitle" placeholder="Title" required>
-      <textarea id="academicContent" placeholder="Content" rows="4" required></textarea>
-      <div class="drop-zone" id="academicDropZone">
-        Drag & drop an image or click to select
-        <input type="file" id="academicFile">
-      </div>
-      <img id="academicPreview" class="file-preview" src="" alt="">
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="academicList"></div>
-  </div>
-
-  <!-- MARKETPLACE -->
-  <div id="marketplace" class="tab-content">
-    <h2>Manage Marketplace</h2>
-    <form id="marketForm">
-      <input type="hidden" id="marketId">
-      <input type="text" id="marketTitle" placeholder="Item Name" required>
-      <input type="text" id="marketPrice" placeholder="Price" required>
-      <div class="drop-zone" id="marketDropZone">
-        Drag & drop an image or click to select
-        <input type="file" id="marketFile">
-      </div>
-      <img id="marketPreview" class="file-preview" src="" alt="">
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="marketList"></div>
-  </div>
-
-  <!-- PDFs -->
-  <div id="pdfs" class="tab-content">
-    <h2>Manage PDFs</h2>
-    <form id="pdfForm">
-      <input type="hidden" id="pdfId">
-      <input type="text" id="pdfTitle" placeholder="Title" required>
-      <textarea id="pdfDescription" placeholder="Description" rows="3"></textarea>
-      <div class="drop-zone" id="pdfDropZone">
-        Drag & drop a PDF or click to select
-        <input type="file" id="pdfFile" accept=".pdf">
-      </div>
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="pdfList"></div>
-  </div>
-
-  <!-- HISTORY -->
-  <div id="history" class="tab-content">
-    <h2>History Log</h2>
-    <ul id="historyList"></ul>
-  </div>
-
-  <!-- MAINTENANCE -->
-  <div id="maintenance" class="tab-content">
-    <h2>Maintenance Mode</h2>
-    <form id="maintenanceForm">
-      <label>
-        <input type="checkbox" id="maintenanceToggle">
-        Enable Maintenance Mode
-      </label>
-      <br><br>
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-  </div>
-</main>
-
-<!-- Popup -->
-<div id="popupMessage">✅ Saved successfully!</div>
-
-<script>
-const SUPABASE_URL = "https://vtpsruejncfykiazrfsx.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0cHNydWVqbmNmeWtpYXpyZnN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NDA5NzQsImV4cCI6MjA3MjMxNjk3NH0.UV55gbsSAgnyolxJhIYTaJUpvoJFsJn0_-LMNwhwAK0"; 
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Show popup
-function showPopup(msg="✅ Saved successfully!"){
-  const popup=document.getElementById("popupMessage");
-  popup.textContent=msg;
-  popup.classList.add("show");
-  setTimeout(()=>popup.classList.remove("show"),2500);
-}
-
-// Tabs
-function openTab(tabId){
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  document.querySelector(`nav button[onclick="openTab('${tabId}')"]`).classList.add('active');
-
-  if(tabId === "history") loadHistory();
-  if(tabId === "maintenance") loadMaintenance();
-}
-
-// Drop Zones
-function setupDropZone(dropId,fileId,previewId){
-  const dz=document.getElementById(dropId);
-  const fileInput=document.getElementById(fileId);
-  const preview=previewId?document.getElementById(previewId):null;
-
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('dragover');
-    fileInput.files = e.dataTransfer.files;
-    if(preview && fileInput.files[0]){
-      preview.src = URL.createObjectURL(fileInput.files[0]);
-      preview.style.display = 'block';
-    }
-  });
-
-  fileInput.addEventListener('change', ()=> {
-    if(preview && fileInput.files[0]){
-      preview.src = URL.createObjectURL(fileInput.files[0]);
-      preview.style.display = 'block';
-    }
-  });
-}
-
-['home','campus','academic','market','pdf'].forEach(id=>{
-  const previewId = id!=='pdf' ? id+'Preview' : null;
-  setupDropZone(id+'DropZone',id+'File',previewId);
-});
-
-async function uploadFile(file, folder){
-  if(!file) return null;
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${folder}/${Date.now()}.${fileExt}`;
-  const { data, error } = await supabase.storage.from('uploads').upload(fileName, file);
-  if(error){ 
-    alert('Upload error: '+error.message); 
-    console.error("Upload error:", error);
-    return null; 
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EYES OF 3080 Admin Panel</title>
+  <link rel="icon" type="image/png" href="https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo">
+  <style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+  body { background:#f1fdf5; color:#0a5a2b; }
+  header { display:flex; align-items:center; justify-content:center; padding:15px 20px; background:#0a5a2b; color:#fff; }
+  header img { height:50px; border-radius:50%; margin-right:10px; }
+  header h1 { font-size:1.5rem; }
+  nav { display:flex; justify-content:center; margin:20px 0; flex-wrap:wrap; }
+  nav button { background:#33cc99; color:#fff; padding:10px 20px; border:none; margin:5px; border-radius:50px; cursor:pointer; transition:0.3s; }
+  nav button.active, nav button:hover { background:#0a5a2b; }
+  main { max-width:900px; margin:0 auto; padding:20px; }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+  form { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:30px; position:relative; }
+  input, textarea { width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
+  button.save-btn { background:#33cc99; color:#fff; padding:12px 20px; border:none; border-radius:50px; cursor:pointer; transition:0.3s; }
+  button.save-btn:hover { background:#0a5a2b; }
+  .item-list { margin-top:20px; }
+  .item { background:#fff; padding:20px; margin:10px 0; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+  .item-actions button { margin-left:10px; padding:8px 16px; border:none; border-radius:50px; cursor:pointer; font-weight:600; }
+  .item-actions .edit-btn { background:#33cc99; color:#fff; }
+  .item-actions .delete-btn { background:#ff4d4d; color:#fff; }
+  .file-preview { margin:10px 0; max-height:200px; border-radius:8px; object-fit:cover; display:block; }
+  .drop-zone { padding:20px; border:2px dashed #0a5a2b; border-radius:12px; text-align:center; color:#666; margin:10px 0; cursor:pointer; position:relative; }
+  .drop-zone.dragover { background:rgba(0,90,43,0.1); border-color:#155e36; color:#0a5a2b; }
+  .drop-zone input[type=file] { position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+  
+  #popupMessage {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #0a5a2b;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.4s ease;
+    z-index: 9999;
   }
-  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName);
-  return urlData.publicUrl;
-}
-
-// Save / Edit
-async function handleSave(section){
-  const form=document.getElementById(section+'Form');
-  const id=document.getElementById(section+'Id').value;
-  const title=document.getElementById(section+'Title')?.value || '';
-  const content=document.getElementById(section+'Content')?.value || '';
-  const date=document.getElementById(section+'Date')?.value || null;
-  const fileInput=document.getElementById(section+'File');
-  const fileUrl = fileInput && fileInput.files[0] ? await uploadFile(fileInput.files[0], section) : null;
-
-  if(id){ 
-    const updates={title, content};
-    if(date) updates.date=date;
-    if(fileUrl) updates.image_url=fileUrl;
-    await client.from(section).update(updates).eq('id', id);
-    await logHistory(section,"update",title);
-  } else { 
-    const newItem={title, content};
-    if(date) newItem.date=date;
-    if(fileUrl) newItem.image_url=fileUrl;
-    await client.from(section).insert(newItem);
-    await logHistory(section,"add",title);
+  #popupMessage.show {
+    opacity: 1;
+    transform: translateY(0);
   }
-  form.reset();
-  const preview=document.getElementById(section+'Preview');
-  if(preview) preview.style.display='none';
-  loadItems(section);
-  showPopup("✅ Saved successfully!");
-}
-
-// Load items
-async function loadItems(section){
-  const list=document.getElementById(section+'List');
-  const { data } = await client.from(section).select('*').order('id',{ascending:false});
-  list.innerHTML='';
-  data.forEach(item=>{
-    const div=document.createElement('div');
-    div.className='item';
-    div.innerHTML=`
-      <div class="item-details">
-        <strong>${item.title}</strong>${item.date? ` (${item.date})` : ''}<br>${item.content || ''}${item.image_url ? `<br><img src="${item.image_url}" style="max-height:150px; margin-top:5px; border-radius:6px;">` : ''}
-      </div>
-      <div class="item-actions">
-        <button class="edit-btn" onclick="editItem('${section}',${item.id})">Edit</button>
-        <button class="delete-btn" onclick="deleteItem('${section}',${item.id},'${item.title}')">Delete</button>
-      </div>`;
-    list.appendChild(div);
+  </style>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  </head>
+  <body>
+  
+  <header>
+    <img src="https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo" alt="Logo">
+    <h1>EYES OF 3080 Admin Panel</h1>
+  </header>
+  
+  <nav>
+    <button onclick="openTab('home')" class="active">Home</button>
+    <button onclick="openTab('campus')">Campus Gist</button>
+    <button onclick="openTab('academic')">Academic Updates</button>
+    <button onclick="openTab('marketplace')">Marketplace</button>
+    <button onclick="openTab('pdfs')">PDFs</button>
+    <button onclick="openTab('history')">History</button>
+    <button onclick="openTab('maintenance')">Maintenance</button>
+  </nav>
+  
+  <main>
+    <!-- HOME -->
+    <div id="home" class="tab-content active">
+      <h2>Manage Home Content</h2>
+      <form id="homeForm">
+        <input type="hidden" id="homeId">
+        <input type="text" id="homeTitle" placeholder="Title" required>
+        <textarea id="homeContent" placeholder="Content" rows="4" required></textarea>
+        <input type="date" id="homeDate" required>
+        <div class="drop-zone" id="homeDropZone">
+          Drag & drop an image or click to select
+          <input type="file" id="homeFile">
+        </div>
+        <img id="homePreview" class="file-preview" src="" alt="">
+        <button type="submit" class="save-btn">Save</button>
+      </form>
+      <div class="item-list" id="homeList"></div>
+    </div>
+  
+    <!-- CAMPUS -->
+    <div id="campus" class="tab-content">
+      <h2>Manage Campus Gist</h2>
+      <form id="campusForm">
+        <input type="hidden" id="campusId">
+        <input type="text" id="campusTitle" placeholder="Title" required>
+        <textarea id="campusContent" placeholder="Content" rows="4" required></textarea>
+        <div class="drop-zone" id="campusDropZone">
+          Drag & drop an image or click to select
+          <input type="file" id="campusFile">
+        </div>
+        <img id="campusPreview" class="file-preview" src="" alt="">
+        <button type="submit" class="save-btn">Save</button>
+      </form>
+      <div class="item-list" id="campusList"></div>
+    </div>
+  
+    <!-- ACADEMIC -->
+    <div id="academic" class="tab-content">
+      <h2>Manage Academic Updates</h2>
+      <form id="academicForm">
+        <input type="hidden" id="academicId">
+        <input type="text" id="academicTitle" placeholder="Title" required>
+        <textarea id="academicContent" placeholder="Content" rows="4" required></textarea>
+        <div class="drop-zone" id="academicDropZone">
+          Drag & drop an image or click to select
+          <input type="file" id="academicFile">
+        </div>
+        <img id="academicPreview" class="file-preview" src="" alt="">
+        <button type="submit" class="save-btn">Save</button>
+      </form>
+      <div class="item-list" id="academicList"></div>
+    </div>
+  
+    <!-- MARKETPLACE -->
+    <div id="marketplace" class="tab-content">
+      <h2>Manage Marketplace</h2>
+      <form id="marketForm">
+        <input type="hidden" id="marketId">
+        <input type="text" id="marketTitle" placeholder="Item Name" required>
+        <input type="text" id="marketPrice" placeholder="Price" required>
+        <div class="drop-zone" id="marketDropZone">
+          Drag & drop an image or click to select
+          <input type="file" id="marketFile">
+        </div>
+        <img id="marketPreview" class="file-preview" src="" alt="">
+        <button type="submit" class="save-btn">Save</button>
+      </form>
+      <div class="item-list" id="marketList"></div>
+    </div>
+  
+    <!-- PDFs -->
+    <div id="pdfs" class="tab-content">
+      <h2>Manage PDFs</h2>
+      <form id="pdfForm">
+        <input type="hidden" id="pdfId">
+        <input type="text" id="pdfTitle" placeholder="Title" required>
+        <textarea id="pdfDescription" placeholder="Description" rows="3"></textarea>
+        <div class="drop-zone" id="pdfDropZone">
+          Drag & drop a PDF or click to select
+          <input type="file" id="pdfFile" accept=".pdf">
+        </div>
+        <button type="submit" class="save-btn">Save</button>
+      </form>
+      <div class="item-list" id="pdfList"></div>
+    </div>
+  
+    <!-- HISTORY -->
+    <div id="history" class="tab-content">
+      <h2>History Log</h2>
+      <ul id="historyList"></ul>
+    </div>
+  
+    <!-- MAINTENANCE -->
+    <div id="maintenance" class="tab-content">
+      <h2>Maintenance Mode</h2>
+      <form id="maintenanceForm">
+        <label>
+          <input type="checkbox" id="maintenanceToggle">
+          Enable Maintenance Mode
+        </label>
+        <br><br>
+        <button type="submit" class="save-btn">Save</button>
+      </form>
+    </div>
+  </main>
+  
+  <!-- Popup -->
+  <div id="popupMessage">✅ Saved successfully!</div>
+  
+  <script>
+  const SUPABASE_URL = "https://vtpsruejncfykiazrfsx.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0cHNydWVqbmNmeWtpYXpyZnN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NDA5NzQsImV4cCI6MjA3MjMxNjk3NH0.UV55gbsSAgnyolxJhIYTaJUpvoJFsJn0_-LMNwhwAK0"; 
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  
+  // Show popup
+  function showPopup(msg="✅ Saved successfully!"){
+    const popup=document.getElementById("popupMessage");
+    popup.textContent=msg;
+    popup.classList.add("show");
+    setTimeout(()=>popup.classList.remove("show"),2500);
+  }
+  
+  // Tabs
+  function openTab(tabId){
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelector(`nav button[onclick="openTab('${tabId}')"]`).classList.add('active');
+  
+    if(tabId === "history") loadHistory();
+    if(tabId === "maintenance") loadMaintenance();
+  }
+  
+  // Drop Zones
+  function setupDropZone(dropId,fileId,previewId){
+    const dz=document.getElementById(dropId);
+    const fileInput=document.getElementById(fileId);
+    const preview=previewId?document.getElementById(previewId):null;
+  
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault(); dz.classList.remove('dragover');
+      fileInput.files = e.dataTransfer.files;
+      if(preview && fileInput.files[0]){
+        preview.src = URL.createObjectURL(fileInput.files[0]);
+        preview.style.display = 'block';
+      }
+    });
+  
+    fileInput.addEventListener('change', ()=> {
+      if(preview && fileInput.files[0]){
+        preview.src = URL.createObjectURL(fileInput.files[0]);
+        preview.style.display = 'block';
+      }
+    });
+  }
+  
+  ['home','campus','academic','market','pdf'].forEach(id=>{
+    const previewId = id!=='pdf' ? id+'Preview' : null;
+    setupDropZone(id+'DropZone',id+'File',previewId);
   });
-}
-
-// Edit
-async function editItem(section,id){
-  const { data } = await client.from(section).select('*').eq('id', id).single();
-  document.getElementById(section+'Id').value=data.id;
-  document.getElementById(section+'Title').value=data.title;
-  if(document.getElementById(section+'Content')) document.getElementById(section+'Content').value=data.content;
-  if(document.getElementById(section+'Date')) document.getElementById(section+'Date').value=data.date || '';
-  if(data.image_url){
+  
+  
+  
+  // Save / Edit
+  async function handleSave(section){
+    const form=document.getElementById(section+'Form');
+    const id=document.getElementById(section+'Id').value;
+    const title=document.getElementById(section+'Title')?.value || '';
+    const content=document.getElementById(section+'Content')?.value || '';
+    const date=document.getElementById(section+'Date')?.value || null;
+    const fileInput=document.getElementById(section+'File');
+    const fileUrl = fileInput && fileInput.files[0] ? await uploadFile(fileInput.files[0], section) : null;
+  
+    if(id){ 
+      const updates={title, content};
+      if(date) updates.date=date;
+      if(fileUrl) updates.image_url=fileUrl;
+      await client.from(section).update(updates).eq('id', id);
+      await logHistory(section,"update",title);
+    } else { 
+      const newItem={title, content};
+      if(date) newItem.date=date;
+      if(fileUrl) newItem.image_url=fileUrl;
+      await client.from(section).insert(newItem);
+      await logHistory(section,"add",title);
+    }
+    form.reset();
     const preview=document.getElementById(section+'Preview');
-    if(preview){ preview.src=data.image_url; preview.style.display='block'; }
+    if(preview) preview.style.display='none';
+    loadItems(section);
+    showPopup("✅ Saved successfully!");
   }
-}
-
-// Delete
-async function deleteItem(section,id,title){
-  if(!confirm('Are you sure?')) return;
-  await client.from(section).delete().eq('id',id);
-  await logHistory(section,"delete",title);
-  loadItems(section);
-  showPopup("🗑️ Deleted successfully!");
-}
-
-// ✅ HISTORY FUNCTIONS
-async function logHistory(section, action, title) {
-  await client.from("history").insert([{ section, action, title }]);
-}
-async function loadHistory() {
-  const list = document.getElementById("historyList");
-  const { data } = await client.from("history").select("*").order("id", { ascending: false }).limit(50);
-  list.innerHTML = "";
-  if (!data || data.length === 0) {
-    list.innerHTML = "<li>No history yet...</li>";
-    return;
+  
+  // Load items
+  async function loadItems(section){
+    const list=document.getElementById(section+'List');
+    const { data } = await client.from(section).select('*').order('id',{ascending:false});
+    list.innerHTML='';
+    data.forEach(item=>{
+      const div=document.createElement('div');
+      div.className='item';
+      div.innerHTML=`
+        <div class="item-details">
+          <strong>${item.title}</strong>${item.date? ` (${item.date})` : ''}<br>${item.content || ''}${item.image_url ? `<br><img src="${item.image_url}" style="max-height:150px; margin-top:5px; border-radius:6px;">` : ''}
+        </div>
+        <div class="item-actions">
+          <button class="edit-btn" onclick="editItem('${section}',${item.id})">Edit</button>
+          <button class="delete-btn" onclick="deleteItem('${section}',${item.id},'${item.title}')">Delete</button>
+        </div>`;
+      list.appendChild(div);
+    });
   }
-  data.forEach(h => {
-    const li = document.createElement("li");
-    li.textContent = `${new Date(h.timestamp).toLocaleString()} → ${h.action.toUpperCase()} "${h.title}" in ${h.section}`;
-    list.appendChild(li);
-  });
-}
-
-// ✅ MAINTENANCE FUNCTIONS
-async function loadMaintenance() {
-  const { data } = await client.from("settings").select("maintenance_mode").eq("id",1).single();
-  if (data) document.getElementById("maintenanceToggle").checked = data.maintenance_mode;
-}
-document.getElementById("maintenanceForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const mode = document.getElementById("maintenanceToggle").checked;
-  await client.from("settings").upsert({ id: 1, maintenance_mode: mode });
-  showPopup("⚡ Maintenance mode updated!");
-});
-
-// Attach
-['home','campus','academic','market','pdf'].forEach(section=>{
-  document.getElementById(section+'Form').addEventListener('submit',e=>{
+  
+  // Edit
+  async function editItem(section,id){
+    const { data } = await client.from(section).select('*').eq('id', id).single();
+    document.getElementById(section+'Id').value=data.id;
+    document.getElementById(section+'Title').value=data.title;
+    if(document.getElementById(section+'Content')) document.getElementById(section+'Content').value=data.content;
+    if(document.getElementById(section+'Date')) document.getElementById(section+'Date').value=data.date || '';
+    if(data.image_url){
+      const preview=document.getElementById(section+'Preview');
+      if(preview){ preview.src=data.image_url; preview.style.display='block'; }
+    }
+  }
+  
+  // Delete
+  async function deleteItem(section,id,title){
+    if(!confirm('Are you sure?')) return;
+    await client.from(section).delete().eq('id',id);
+    await logHistory(section,"delete",title);
+    loadItems(section);
+    showPopup("🗑️ Deleted successfully!");
+  }
+  
+  // ✅ HISTORY FUNCTIONS
+  async function logHistory(section, action, title) {
+    await client.from("history").insert([{ section, action, title }]);
+  }
+  async function loadHistory() {
+    const list = document.getElementById("historyList");
+    const { data } = await client.from("history").select("*").order("id", { ascending: false }).limit(50);
+    list.innerHTML = "";
+    if (!data || data.length === 0) {
+      list.innerHTML = "<li>No history yet...</li>";
+      return;
+    }
+    data.forEach(h => {
+      const li = document.createElement("li");
+      li.textContent = `${new Date(h.timestamp).toLocaleString()} → ${h.action.toUpperCase()} "${h.title}" in ${h.section}`;
+      list.appendChild(li);
+    });
+  }
+  
+  // ✅ MAINTENANCE FUNCTIONS
+  async function loadMaintenance() {
+    const { data } = await client.from("settings").select("maintenance_mode").eq("id",1).single();
+    if (data) document.getElementById("maintenanceToggle").checked = data.maintenance_mode;
+  }
+  document.getElementById("maintenanceForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    handleSave(section);
+    const mode = document.getElementById("maintenanceToggle").checked;
+    await client.from("settings").upsert({ id: 1, maintenance_mode: mode });
+    showPopup("⚡ Maintenance mode updated!");
   });
-  loadItems(section);
-});
-</script>
-</body>
-</html>
+  
+  // Attach
+  ['home','campus','academic','market','pdf'].forEach(section=>{
+    document.getElementById(section+'Form').addEventListener('submit',e=>{
+      e.preventDefault();
+      handleSave(section);
+    });
+    loadItems(section);
+  });
+  </script>
+  </body>
+  </html>
