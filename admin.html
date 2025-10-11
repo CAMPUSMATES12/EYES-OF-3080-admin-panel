@@ -72,6 +72,55 @@
     <div class="item-list" id="homeList"></div>
   </div>
 
+<!-- 💳 PDF PAYMENT MANAGEMENT -->
+<div id="pdfPayments" class="tab-content">
+  <h2 style="color:#006400;">💳 Manage PDF Payments</h2>
+
+  <!-- Payment Form -->
+  <form id="paymentForm" style="margin-top:15px;">
+    <input type="hidden" id="paymentId">
+
+    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+      <input type="text" id="paymentFullName" placeholder="Full Name" required style="flex:1; min-width:200px;">
+      <input type="email" id="paymentEmail" placeholder="Email" required style="flex:1; min-width:200px;">
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
+      <input type="text" id="paymentTransactionId" placeholder="Transaction ID" required style="flex:1; min-width:200px;">
+      <input type="number" id="paymentAmount" placeholder="Amount (₦)" value="500" required style="flex:1; min-width:200px;">
+    </div>
+
+    <select id="paymentStatus" required style="margin-top:10px; width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+      <option value="">-- Select Status --</option>
+      <option value="pending">Pending</option>
+      <option value="verified">Verified ✅</option>
+    </select>
+
+    <!-- Optional Proof Upload -->
+    <div class="drop-zone" id="proofDropZone" style="margin-top:12px;">
+      📎 Upload proof (optional)
+      <input type="file" id="paymentProof" accept="image/*,application/pdf">
+    </div>
+    <img id="proofPreview" class="file-preview" src="" alt="">
+
+    <button type="submit" class="save-btn" style="
+      margin-top:12px;
+      background:#006400;
+      color:white;
+      padding:10px 20px;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:600;">💾 Save / Update Payment</button>
+  </form>
+
+  <!-- Payment List -->
+  <div id="paymentList" class="item-list" style="margin-top:25px;">
+    <h3 style="color:#006400;">📋 All PDF Payments</h3>
+    <p style="font-size:14px; color:#555;">View, verify, or manage user payments below.</p>
+  </div>
+</div>
+
   <!-- CAMPUS -->
   <div id="campus" class="tab-content">
     <h2>Manage Campus Gist</h2>
@@ -139,55 +188,6 @@
     </form>
     <div class="item-list" id="pdfList"></div>
   </div>
-  
-  <!-- 💳 PDF PAYMENT MANAGEMENT -->
-<div id="pdfPayments" class="tab-content">
-  <h2 style="color:#006400;">💳 Manage PDF Payments</h2>
-
-  <!-- Payment Form -->
-  <form id="paymentForm" style="margin-top:15px;">
-    <input type="hidden" id="paymentId">
-
-    <div style="display:flex; flex-wrap:wrap; gap:10px;">
-      <input type="text" id="paymentFullName" placeholder="Full Name" required style="flex:1; min-width:200px;">
-      <input type="email" id="paymentEmail" placeholder="Email" required style="flex:1; min-width:200px;">
-    </div>
-
-    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
-      <input type="text" id="paymentTransactionId" placeholder="Transaction ID" required style="flex:1; min-width:200px;">
-      <input type="number" id="paymentAmount" placeholder="Amount (₦)" value="500" required style="flex:1; min-width:200px;">
-    </div>
-
-    <select id="paymentStatus" required style="margin-top:10px; width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
-      <option value="">-- Select Status --</option>
-      <option value="pending">Pending</option>
-      <option value="verified">Verified ✅</option>
-    </select>
-
-    <!-- Optional Proof Upload -->
-    <div class="drop-zone" id="proofDropZone" style="margin-top:12px;">
-      📎 Upload proof (optional)
-      <input type="file" id="paymentProof" accept="image/*,application/pdf">
-    </div>
-    <img id="proofPreview" class="file-preview" src="" alt="">
-
-    <button type="submit" class="save-btn" style="
-      margin-top:12px;
-      background:#006400;
-      color:white;
-      padding:10px 20px;
-      border:none;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:600;">💾 Save / Update Payment</button>
-  </form>
-
-  <!-- Payment List -->
-  <div id="paymentList" class="item-list" style="margin-top:25px;">
-    <h3 style="color:#006400;">📋 All PDF Payments</h3>
-    <p style="font-size:14px; color:#555;">View, verify, or manage user payments below.</p>
-  </div>
-</div>
 
   <!-- HISTORY -->
   <div id="history" class="tab-content">
@@ -212,9 +212,13 @@
 <!-- Popup -->
 <div id="popupMessage">✅ Saved successfully!</div>
 
+<script src="https://unpkg.com/@supabase/supabase-js"></script>
 <script>
+/* ============================
+   SUPABASE CONNECTION
+============================ */
 const SUPABASE_URL = "https://vtpsruejncfykiazrfsx.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0cHNydWVqbmNmeWtpYXpyZnN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NDA5NzQsImV4cCI6MjA3MjMxNjk3NH0.UV55gbsSAgnyolxJhIYTaJUpvoJFsJn0_-LMNwhwAK0"; 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0cHNydWVqbmNmeWtpYXpyZnN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NDA5NzQsImV4cCI6MjA3MjMxNjk3NH0.UV55gbsSAgnyolxJhIYTaJUpvoJFsJn0_-LMNwhwAK0";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ============================
@@ -242,7 +246,7 @@ async function loadPayments() {
 
     paymentList.innerHTML = data
       .map(payment => `
-        <div id="payment-${payment.email}" class="payment-card" style="
+        <div id="payment-${payment.id}" class="payment-card" style="
           border:1px solid ${payment.verified ? '#00b894' : '#ff9800'};
           border-radius:8px;
           padding:15px;
@@ -253,21 +257,21 @@ async function loadPayments() {
           <span>Txn ID:</span> ${payment.transaction_id || "N/A"}<br>
           <span>Amount:</span> ₦${payment.amount || 500}<br>
           <span>Status:</span> 
-            <b id="status-${payment.email}" style="color:${payment.verified ? '#00b894' : '#ff9800'};">
+            <b id="status-${payment.id}" style="color:${payment.verified ? '#00b894' : '#ff9800'};">
               ${payment.verified ? "Verified ✅" : "Pending ⏳"}
             </b><br>
           ${payment.proof_url ? `<a href="${payment.proof_url}" target="_blank" style="color:#006400;">📎 View Proof</a><br>` : ""}
           ${payment.verified_at ? `<small style="color:#555;">✔ Verified at ${new Date(payment.verified_at).toLocaleString()}</small><br>` : ""}
           <div style="margin-top:8px;">
             ${!payment.verified
-              ? `<button onclick="verifyPayment('${payment.email}')" 
-                   id="verifyBtn-${payment.email}"
+              ? `<button onclick="changePaymentStatus(${payment.id},'verified')" 
+                   id="verifyBtn-${payment.id}"
                    style="background:#006400;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">
                    Verify ✅</button>`
-              : `<button onclick="markPending('${payment.email}')" 
+              : `<button onclick="changePaymentStatus(${payment.id},'pending')" 
                    style="background:#ff9800;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">
                    Mark Pending</button>`}
-            <button onclick="deletePayment('${payment.email}')" 
+            <button onclick="deletePayment(${payment.id})" 
               style="background:#b00020;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;margin-left:5px;">
               🗑 Delete
             </button>
@@ -282,70 +286,42 @@ async function loadPayments() {
 }
 
 /* ============================
-   VERIFY PAYMENT (Instant + Auto Update)
+   CHANGE PAYMENT STATUS
 ============================ */
-async function verifyPayment(email) {
-  if (!confirm(`✅ Verify payment for ${email}?`)) return;
+async function changePaymentStatus(id, status) {
+  // ensure id is integer
+  id = parseInt(id);
 
-  try {
-    const { error } = await client
-      .from("pdf_access")
-      .update({ paid: true, verified: true, verified_at: new Date().toISOString() })
-      .eq("email", email);
+  let updateObj = {};
 
-    if (error) throw error;
-
-    // ✅ Update UI instantly
-    const card = document.getElementById(`payment-${email}`);
-    const status = document.getElementById(`status-${email}`);
-    const button = document.getElementById(`verifyBtn-${email}`);
-
-    if (card && status) {
-      card.style.borderColor = "#00b894";
-      status.textContent = "Verified ✅";
-      status.style.color = "#00b894";
-    }
-
-    if (button) {
-      button.outerHTML = `<button onclick="markPending('${email}')"
-        style="background:#ff9800;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">
-        Mark Pending</button>`;
-    }
-
-    alert("✅ Payment verified successfully!");
-
-  } catch (err) {
-    console.error("❌ Verification error:", err);
-    alert("❌ Failed to verify payment: " + err.message);
+  switch(status) {
+    case 'pending':
+      updateObj = { paid: false, verified: false, verified_at: null };
+      break;
+    case 'verified':
+      updateObj = { paid: true, verified: true, verified_at: new Date().toISOString() };
+      break;
+    default:
+      console.error('Unknown status', status);
+      return;
   }
-}
-
-/* ============================
-   MARK PENDING
-============================ */
-async function markPending(email) {
-  if (!confirm(`⚠️ Mark ${email} as pending again?`)) return;
 
   try {
-    const { error } = await client
+    const { data, error } = await client
       .from("pdf_access")
-      .update({ paid: false, verified: false })
-      .eq("email", email);
+      .update(updateObj)
+      .eq("id", id)
+      .select(); // return updated row for confirmation
 
     if (error) throw error;
+    if (!data || data.length === 0) throw new Error("No row updated. Check if ID exists.");
 
-    const card = document.getElementById(`payment-${email}`);
-    const status = document.getElementById(`status-${email}`);
-    if (card && status) {
-      card.style.borderColor = "#ff9800";
-      status.textContent = "Pending ⏳";
-      status.style.color = "#ff9800";
-    }
+    // ✅ update UI
+    const verified = updateObj.verified === true;
+    updatePaymentCardUI(id, verified);
 
-    alert("⏳ Payment marked as pending.");
-
-  } catch (err) {
-    console.error("❌ Error updating payment:", err);
+  } catch(err) {
+    console.error("❌ Failed to update status", err);
     alert("❌ Failed to update status: " + err.message);
   }
 }
@@ -353,22 +329,19 @@ async function markPending(email) {
 /* ============================
    DELETE PAYMENT
 ============================ */
-async function deletePayment(email) {
-  if (!confirm(`🗑 Are you sure you want to delete payment for ${email}?`)) return;
+async function deletePayment(id) {
+  if (!confirm(`🗑 Are you sure you want to delete this payment?`)) return;
 
   try {
     const { error } = await client
       .from("pdf_access")
       .delete()
-      .eq("email", email);
+      .eq("id", id);
 
     if (error) throw error;
 
-    const card = document.getElementById(`payment-${email}`);
+    const card = document.getElementById(`payment-${id}`);
     if (card) card.remove();
-
-    alert("🗑 Payment deleted successfully!");
-
   } catch (err) {
     console.error("❌ Delete error:", err);
     alert("❌ Could not delete payment: " + err.message);
@@ -376,7 +349,28 @@ async function deletePayment(email) {
 }
 
 /* ============================
-   ADD / UPDATE PAYMENT (FORM)
+   UPDATE CARD UI
+============================ */
+function updatePaymentCardUI(id, verified) {
+  const card = document.getElementById(`payment-${id}`);
+  const status = document.getElementById(`status-${id}`);
+  const button = document.getElementById(`verifyBtn-${id}`);
+
+  if (card && status) {
+    card.style.borderColor = verified ? "#00b894" : "#ff9800";
+    status.textContent = verified ? "Verified ✅" : "Pending ⏳";
+    status.style.color = verified ? "#00b894" : "#ff9800";
+  }
+
+  if (button) {
+    button.outerHTML = verified
+      ? `<button onclick="changePaymentStatus(${id},'pending')" style="background:#ff9800;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Mark Pending</button>`
+      : `<button onclick="changePaymentStatus(${id},'verified')" id="verifyBtn-${id}" style="background:#006400;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Verify ✅</button>`;
+  }
+}
+
+/* ============================
+   ADD / UPDATE PAYMENT
 ============================ */
 paymentForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -406,7 +400,6 @@ paymentForm.addEventListener("submit", async (e) => {
     alert("✅ Payment saved successfully!");
     paymentForm.reset();
     loadPayments();
-
   } catch (err) {
     console.error("❌ Error saving payment:", err);
     alert("❌ Failed to save payment: " + err.message);
@@ -418,17 +411,20 @@ paymentForm.addEventListener("submit", async (e) => {
 ============================ */
 client
   .channel("pdf_access-changes")
-  .on("postgres_changes", { event: "*", schema: "public", table: "pdf_access" }, (payload) => {
-    console.log("📡 Realtime update:", payload);
-    loadPayments(); // Auto-refresh when any record changes
-  })
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "pdf_access" },
+    (payload) => {
+      console.log("📡 Realtime update:", payload);
+      loadPayments();
+    }
+  )
   .subscribe();
 
 /* ============================
    INITIAL LOAD
 ============================ */
 document.addEventListener("DOMContentLoaded", loadPayments);
-
 
 // Upload
 async function uploadFile(file, section) {
