@@ -32,6 +32,57 @@
   .drop-zone input[type=file] { position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; }
   #popupMessage { position: fixed; top: 20px; right: 20px; background: #0a5a2b; color: #fff; padding: 12px 20px; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transform: translateY(-20px); transition: all 0.4s ease; z-index: 9999; }
   #popupMessage.show { opacity: 1; transform: translateY(0); }
+  /* ===== PAYMENT CARD STYLES ===== */
+.payment-card {
+  border: 2px solid #00b894; /* green border */
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+  background: linear-gradient(145deg, #e0f8e0, #c6f0c6); /* light green gradient */
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.payment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 184, 148, 0.4);
+}
+
+.payment-card button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.payment-card button.verify-btn {
+  background: #00b894;
+  color: #fff;
+}
+
+.payment-card button.verify-btn:hover {
+  background: #00a17a;
+}
+
+.payment-card button.pending-btn {
+  background: #ff9800;
+  color: #fff;
+}
+
+.payment-card button.pending-btn:hover {
+  background: #e68a00;
+}
+
+.payment-card button.delete-btn {
+  background: #b00020;
+  color: #fff;
+}
+
+.payment-card button.delete-btn:hover {
+  background: #8a0018;
+}
   </style>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
@@ -367,6 +418,21 @@ async function changePaymentStatus(id, status) {
 
     const verified = updateObj.verified === true;
     updatePaymentCardUI(id, verified);
+
+    // ✅ Send confirmation email if verified
+    if (verified) {
+      const user = data[0]; // Supabase returned the updated row
+
+      emailjs.send("service_7hcax5y", "template_1ecw48o", {
+        username: user.full_name,
+        email: user.email,
+        transactionId: user.transaction_id,
+        amount: user.amount,
+        siteName: "Eyes of 3080"
+      })
+      .then(() => console.log(`✅ Payment confirmation email sent to ${user.email}`))
+      .catch(err => console.error("❌ Email sending failed:", err));
+    }
 
   } catch(err) {
     console.error("❌ Failed to update status", err);
