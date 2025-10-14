@@ -155,23 +155,73 @@
     <div class="item-list" id="academicList"></div>
   </div>
 
-  <!-- MARKETPLACE -->
-  <div id="marketplace" class="tab-content">
-    <h2>Manage Marketplace</h2>
-    <form id="marketForm">
-      <input type="hidden" id="marketId">
-      <input type="text" id="marketTitle" placeholder="Item Name" required>
-      <input type="text" id="marketPrice" placeholder="Price" required>
-      <div class="drop-zone" id="marketDropZone">
-        Drag & drop an image or click to select
-        <input type="file" id="marketFile">
-      </div>
-      <img id="marketPreview" class="file-preview" src="" alt="">
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="marketList"></div>
-  </div>
+<!-- MARKETPLACE -->
+<div id="marketplace" class="tab-content">
+  <h2>🛍️ Manage Marketplace</h2>
 
+  <form id="marketForm">
+    <input type="hidden" id="marketId">
+
+    <!-- Product Name -->
+    <input type="text" id="marketTitle" placeholder="Product Name" required>
+
+    <!-- Description -->
+    <textarea id="marketDescription" placeholder="Product Description" rows="3" required></textarea>
+
+    <!-- Price -->
+    <input type="number" id="marketPrice" placeholder="Price (₦)" required>
+
+    <!-- Stock Quantity -->
+    <input type="number" id="marketStock" placeholder="Stock Quantity" value="1" required>
+
+    <!-- Seller WhatsApp -->
+    <input type="text" id="sellerWhatsapp" placeholder="Seller WhatsApp Number (e.g. 2348012345678)" required>
+
+    <!-- Image Upload -->
+    <div class="drop-zone" id="marketDropZone">
+      Drag & drop images or click to select
+      <input type="file" id="marketFiles" multiple accept="image/*">
+    </div>
+
+    <!-- Preview Section -->
+    <div id="marketPreviews" class="previews" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
+
+    <button type="submit" class="save-btn" style="margin-top:15px;">Save</button>
+  </form>
+
+  <h3 style="margin-top:30px;">Existing Products</h3>
+  <div class="item-list" id="marketList"></div>
+</div>
+
+<!-- Optional CSS for Previews -->
+<style>
+  .drop-zone {
+    border: 2px dashed #aaa;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+    border-radius: 6px;
+  }
+  .drop-zone.dragover {
+    border-color: #555;
+    background-color: #f9f9f9;
+  }
+  .previews img {
+    max-height: 120px;
+    margin: 5px;
+    border-radius: 6px;
+  }
+  .item-list .item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+  }
+  .item-actions button {
+    margin-right: 5px;
+  }
+</style>
   <!-- PDF -->
   <div id="pdfs" class="tab-content">
     <h2>Manage PDFs</h2>
@@ -212,24 +262,23 @@
 <!-- Popup -->
 <div id="popupMessage">✅ Saved successfully!</div>
 
-<script src="https://unpkg.com/@supabase/supabase-js"></script>
 <script>
-/* ============================
-   SUPABASE CONNECTION
-============================ */
+// ============================
+// SUPABASE CONNECTION
+// ============================
 const SUPABASE_URL = "https://vtpsruejncfykiazrfsx.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0cHNydWVqbmNmeWtpYXpyZnN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NDA5NzQsImV4cCI6MjA3MjMxNjk3NH0.UV55gbsSAgnyolxJhIYTaJUpvoJFsJn0_-LMNwhwAK0";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ============================
-   ELEMENTS
-============================ */
+// ============================
+// ELEMENTS
+// ============================
 const paymentForm = document.getElementById("paymentForm");
 const paymentList = document.getElementById("paymentList");
 
-/* ============================
-   LOAD PAYMENTS
-============================ */
+// ============================
+// LOAD PAYMENTS
+// ============================
 async function loadPayments() {
   try {
     const { data, error } = await client
@@ -239,10 +288,12 @@ async function loadPayments() {
 
     if (error) throw error;
 
-    if (!data.length) {
-      paymentList.innerHTML = "<p style='color:#555;'>No payments found yet.</p>";
+    if (!data || data.length === 0) {
+      if (paymentList) paymentList.innerHTML = "<p style='color:#555;'>No payments found yet.</p>";
       return;
     }
+
+    if (!paymentList) return;
 
     paymentList.innerHTML = data
       .map(payment => `
@@ -281,19 +332,17 @@ async function loadPayments() {
       .join("");
   } catch (err) {
     console.error("❌ Error loading payments:", err);
-    paymentList.innerHTML = "<p style='color:red;'>Failed to load payments.</p>";
+    if (paymentList) paymentList.innerHTML = "<p style='color:red;'>Failed to load payments.</p>";
   }
 }
 
-/* ============================
-   CHANGE PAYMENT STATUS
-============================ */
+// ============================
+// CHANGE PAYMENT STATUS
+// ============================
 async function changePaymentStatus(id, status) {
-  // ensure id is integer
   id = parseInt(id);
 
   let updateObj = {};
-
   switch(status) {
     case 'pending':
       updateObj = { paid: false, verified: false, verified_at: null };
@@ -311,24 +360,23 @@ async function changePaymentStatus(id, status) {
       .from("pdf_access")
       .update(updateObj)
       .eq("id", id)
-      .select(); // return updated row for confirmation
+      .select();
 
     if (error) throw error;
     if (!data || data.length === 0) throw new Error("No row updated. Check if ID exists.");
 
-    // ✅ update UI
     const verified = updateObj.verified === true;
     updatePaymentCardUI(id, verified);
 
   } catch(err) {
     console.error("❌ Failed to update status", err);
-    alert("❌ Failed to update status: " + err.message);
+    alert("❌ Failed to update status: " + (err.message || err));
   }
 }
 
-/* ============================
-   DELETE PAYMENT
-============================ */
+// ============================
+// DELETE PAYMENT
+// ============================
 async function deletePayment(id) {
   if (!confirm(`🗑 Are you sure you want to delete this payment?`)) return;
 
@@ -344,13 +392,13 @@ async function deletePayment(id) {
     if (card) card.remove();
   } catch (err) {
     console.error("❌ Delete error:", err);
-    alert("❌ Could not delete payment: " + err.message);
+    alert("❌ Could not delete payment: " + (err.message || err));
   }
 }
 
-/* ============================
-   UPDATE CARD UI
-============================ */
+// ============================
+// UPDATE CARD UI
+// ============================
 function updatePaymentCardUI(id, verified) {
   const card = document.getElementById(`payment-${id}`);
   const status = document.getElementById(`status-${id}`);
@@ -369,46 +417,48 @@ function updatePaymentCardUI(id, verified) {
   }
 }
 
-/* ============================
-   ADD / UPDATE PAYMENT
-============================ */
-paymentForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+// ============================
+// ADD / UPDATE PAYMENT
+// ============================
+if (paymentForm) {
+  paymentForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const full_name = document.getElementById("paymentFullName").value.trim();
-  const email = document.getElementById("paymentEmail").value.trim();
-  const transaction_id = document.getElementById("paymentTransactionId").value.trim();
-  const amount = parseInt(document.getElementById("paymentAmount").value);
-  const status = document.getElementById("paymentStatus").value;
+    const full_name = document.getElementById("paymentFullName").value.trim();
+    const email = document.getElementById("paymentEmail").value.trim();
+    const transaction_id = document.getElementById("paymentTransactionId").value.trim();
+    const amount = parseInt(document.getElementById("paymentAmount").value);
+    const status = document.getElementById("paymentStatus").value;
 
-  const paid = status === "verified";
-  const verified = status === "verified";
+    const paid = status === "verified";
+    const verified = status === "verified";
 
-  try {
-    const { error } = await client.from("pdf_access").upsert({
-      email,
-      full_name,
-      transaction_id,
-      amount,
-      paid,
-      verified,
-      verified_at: verified ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString(),
-    });
+    try {
+      const { error } = await client.from("pdf_access").upsert({
+        email,
+        full_name,
+        transaction_id,
+        amount,
+        paid,
+        verified,
+        verified_at: verified ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      });
 
-    if (error) throw error;
-    alert("✅ Payment saved successfully!");
-    paymentForm.reset();
-    loadPayments();
-  } catch (err) {
-    console.error("❌ Error saving payment:", err);
-    alert("❌ Failed to save payment: " + err.message);
-  }
-});
+      if (error) throw error;
+      alert("✅ Payment saved successfully!");
+      paymentForm.reset();
+      loadPayments();
+    } catch (err) {
+      console.error("❌ Error saving payment:", err);
+      alert("❌ Failed to save payment: " + (err.message || err));
+    }
+  });
+}
 
-/* ============================
-   REAL-TIME AUTO UPDATE
-============================ */
+// ============================
+// REAL-TIME AUTO UPDATE
+// ============================
 client
   .channel("pdf_access-changes")
   .on(
@@ -421,12 +471,26 @@ client
   )
   .subscribe();
 
-/* ============================
-   INITIAL LOAD
-============================ */
-document.addEventListener("DOMContentLoaded", loadPayments);
+// ============================
+// INITIAL LOAD
+// ============================
+document.addEventListener("DOMContentLoaded", () => {
+  // Load payments (if the element exists)
+  if (paymentList) loadPayments();
 
-// Upload
+  // Attach drop zones and load other sections
+  safeSetupDropZones();
+  attachSectionForms();
+  loadItems('home');
+  loadItems('campus');
+  loadItems('academic');
+  loadItems('pdf'); // pdf items
+  loadMarketItems(); // marketplace
+});
+
+// ============================
+// UPLOAD + WATERMARK HELPERS
+// ============================
 async function uploadFile(file, section) {
   try {
     let uploadFile = file;
@@ -434,7 +498,7 @@ async function uploadFile(file, section) {
       uploadFile = await addWatermark(file);
     }
     const fileName = `${section}/${Date.now()}-${file.name}`;
-    const { error } = await client.storage.from("uploads").upload(fileName, uploadFile);
+    const { error } = await client.storage.from("uploads").upload(fileName, uploadFile, { upsert: true });
     if (error) throw error;
     const { data } = client.storage.from("uploads").getPublicUrl(fileName);
     return data.publicUrl;
@@ -445,7 +509,6 @@ async function uploadFile(file, section) {
   }
 }
 
-// Watermark for images
 async function addWatermark(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -462,7 +525,7 @@ async function addWatermark(file) {
         logo.crossOrigin = "anonymous";
         logo.src = "https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo";
         logo.onload = () => {
-          const logoWidth = img.width * 0.25; 
+          const logoWidth = img.width * 0.25;
           const logoHeight = (logo.height / logo.width) * logoWidth;
           ctx.globalAlpha = 0.85;
           ctx.drawImage(logo, img.width - logoWidth - 20, img.height - logoHeight - 20, logoWidth, logoHeight);
@@ -478,176 +541,265 @@ async function addWatermark(file) {
   });
 }
 
-// Popup
+// ============================
+// POPUP
+// ============================
 function showPopup(msg="✅ Saved successfully!"){
   const popup=document.getElementById("popupMessage");
+  if (!popup) return;
   popup.textContent=msg;
   popup.classList.add("show");
   setTimeout(()=>popup.classList.remove("show"),2500);
 }
 
-// Tabs
+// ============================
+// TABS
+// ============================
 function openTab(tabId){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
+  const el = document.getElementById(tabId);
+  if (el) el.classList.add('active');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  document.querySelector(`nav button[onclick="openTab('${tabId}')"]`).classList.add('active');
+  const btn = document.querySelector(`nav button[onclick="openTab('${tabId}')"]`);
+  if (btn) btn.classList.add('active');
   if(tabId === "history") loadHistory();
   if(tabId === "pdfs") loadItems("pdf");
+  if(tabId === "marketplace") loadMarketItems();
 }
 
-// Drop Zones
+// ============================
+// SAFE DROP ZONE SETUP
+// ============================
 function setupDropZone(dropId,fileId,previewId){
-  const dz=document.getElementById(dropId);
-  const fileInput=document.getElementById(fileId);
-  const preview=previewId?document.getElementById(previewId):null;
+  const dz = document.getElementById(dropId);
+  const fileInput = document.getElementById(fileId);
+  const preview = previewId ? document.getElementById(previewId) : null;
+  if (!dz || !fileInput) return;
+
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
   dz.addEventListener('drop', e => {
     e.preventDefault(); dz.classList.remove('dragover');
     fileInput.files = e.dataTransfer.files;
-    if(preview && fileInput.files[0]){
-      preview.textContent = fileInput.files[0].name;
+    // preview handling
+    if (preview && fileInput.files[0]) {
+      if (fileInput.multiple) preview.innerHTML = ''; // clear for multiple
       preview.style.display = 'block';
+      if (fileInput.multiple) {
+        // show thumbnails for each
+        Array.from(fileInput.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            const img = document.createElement('img');
+            img.src = ev.target.result;
+            img.style.maxHeight = '120px';
+            img.style.margin = '5px';
+            img.style.borderRadius = '6px';
+            preview.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+      } else {
+        preview.textContent = fileInput.files[0].name;
+      }
     }
   });
+
   fileInput.addEventListener('change', ()=> {
-    if(preview && fileInput.files[0]){
-      preview.textContent = fileInput.files[0].name;
-      preview.style.display = 'block';
-    }
+    if (!preview) return;
+    preview.innerHTML = '';
+    if (!fileInput.files || fileInput.files.length === 0) { preview.style.display='none'; return; }
+    preview.style.display = 'block';
+    Array.from(fileInput.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.maxHeight = '120px';
+        img.style.margin = '5px';
+        img.style.borderRadius = '6px';
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
   });
 }
-['home','campus','academic','market','pdf'].forEach(id=>{
-  const previewId = id!=='pdf' ? id+'Preview' : "pdfPreview";
-  setupDropZone(id+'DropZone',id+'File',previewId);
-});
 
-// Save / Edit
+function safeSetupDropZones() {
+  // map of dropId -> fileId -> previewId
+  const mappings = [
+    { drop: 'homeDropZone', file: 'homeFile', preview: 'homePreview' },
+    { drop: 'campusDropZone', file: 'campusFile', preview: 'campusPreview' },
+    { drop: 'academicDropZone', file: 'academicFile', preview: 'academicPreview' },
+    { drop: 'pdfDropZone', file: 'pdfFile', preview: 'pdfPreview' },
+    // marketplace uses multiple images preview
+    { drop: 'marketDropZone', file: 'marketFiles', preview: 'marketPreviews' },
+    { drop: 'marketplaceDropZone', file: 'marketFiles', preview: 'marketPreviews' } // in case id differs
+  ];
+  mappings.forEach(m => setupDropZone(m.drop, m.file, m.preview));
+}
+
+// ============================
+// SAVE / EDIT GENERIC (home, campus, academic, pdf)
+// ============================
 async function handleSave(section){
-  const form=document.getElementById(section+'Form');
-  const id=document.getElementById(section+'Id').value;
-  let fileUrl=null;
+  const form = document.getElementById(section+'Form');
+  if (!form) return;
+  const idEl = document.getElementById(section+'Id');
+  const id = idEl ? idEl.value : null;
+  let fileUrl = null;
 
   if(section==="pdf"){
-    const topic=document.getElementById("pdfTopic").value;
-    const level=document.getElementById("pdfLevel").value;
-    const fileInput=document.getElementById("pdfFile");
-    if(fileInput.files[0]) fileUrl=await uploadFile(fileInput.files[0], section);
+    const topic = document.getElementById("pdfTopic").value;
+    const level = document.getElementById("pdfLevel").value;
+    const fileInput = document.getElementById("pdfFile");
+    if (fileInput && fileInput.files[0]) fileUrl = await uploadFile(fileInput.files[0], section);
 
-    if(id){
-      const updates={topic, level};
-      if(fileUrl) updates.pdf_url=fileUrl;
+    if (id) {
+      const updates = { topic, level };
+      if (fileUrl) updates.pdf_url = fileUrl;
       await client.from("pdf").update(updates).eq("id", id);
-      await logHistory("pdf","update",topic);
+      await logHistory("pdf", "update", topic);
     } else {
-      const newItem={topic, level};
-      if(fileUrl) newItem.pdf_url=fileUrl;
+      const newItem = { topic, level };
+      if (fileUrl) newItem.pdf_url = fileUrl;
       await client.from("pdf").insert(newItem);
-      await logHistory("pdf","add",topic);
+      await logHistory("pdf", "add", topic);
     }
     loadItems("pdf");
   } else {
-    const title=document.getElementById(section+'Title').value;
-    const content=document.getElementById(section+'Content')?.value || '';
-    const date=document.getElementById(section+'Date')?.value || null;
-    const fileInput=document.getElementById(section+'File');
-    if(fileInput && fileInput.files[0]) fileUrl=await uploadFile(fileInput.files[0], section);
+    const title = document.getElementById(section+'Title') ? document.getElementById(section+'Title').value : '';
+    const content = document.getElementById(section+'Content') ? document.getElementById(section+'Content').value : '';
+    const date = document.getElementById(section+'Date') ? document.getElementById(section+'Date').value : null;
+    const fileInput = document.getElementById(section+'File');
+    if (fileInput && fileInput.files[0]) fileUrl = await uploadFile(fileInput.files[0], section);
 
-    if(id){
-      const updates={title, content};
-      if(date) updates.date=date;
-      if(fileUrl) updates.image_url=fileUrl;
+    if (id) {
+      const updates = { title, content };
+      if (date) updates.date = date;
+      if (fileUrl) updates.image_url = fileUrl;
       await client.from(section).update(updates).eq("id", id);
-      await logHistory(section,"update",title);
+      await logHistory(section, "update", title);
     } else {
-      const newItem={title, content};
-      if(date) newItem.date=date;
-      if(fileUrl) newItem.image_url=fileUrl;
+      const newItem = { title, content };
+      if (date) newItem.date = date;
+      if (fileUrl) newItem.image_url = fileUrl;
       await client.from(section).insert(newItem);
-      await logHistory(section,"add",title);
+      await logHistory(section, "add", title);
     }
     loadItems(section);
   }
-  form.reset();
-  const preview=document.getElementById(section==="pdf"? "pdfPreview":section+'Preview');
-  if(preview) preview.style.display='none';
+
+  if (form) form.reset();
+  const preview = document.getElementById(section==="pdf"? "pdfPreview":section+'Preview');
+  if (preview) preview.style.display='none';
   showPopup("✅ Saved successfully!");
 }
 
-// Load items
+// ============================
+// LOAD ITEMS (generic for home, campus, academic, pdf)
+// ============================
 async function loadItems(section){
-  const list=document.getElementById(section+'List');
-  const { data } = await client.from(section==="pdf"?"pdf":section).select('*').order('id',{ascending:false});
-  list.innerHTML='';
-  if(!data||data.length===0){ list.innerHTML="<p>No items yet.</p>"; return; }
-  data.forEach(item=>{
-    const div=document.createElement('div');
-    div.className='item';
-    if(section==="pdf"){
-      div.innerHTML=`
-        <div class="item-details">
-          <strong>${item.topic}</strong> (${item.level||""})<br>
-          ${item.pdf_url?`<a href="${item.pdf_url}" target="_blank">📄 View PDF</a>`:""}
-        </div>
-        <div class="item-actions">
-          <button class="edit-btn" onclick="editItem('pdf',${item.id})">Edit</button>
-          <button class="delete-btn" onclick="deleteItem('pdf',${item.id},'${item.topic}')">Delete</button>
-        </div>`;
-    } else {
-      div.innerHTML=`
-        <div class="item-details">
-          <strong>${item.title}</strong>${item.date? ` (${item.date})` : ''}<br>
-          ${item.content||''}
-          ${item.image_url ? `<br><img src="${item.image_url}" style="max-height:150px; margin-top:5px; border-radius:6px;">` : ''}
-        </div>
-        <div class="item-actions">
-          <button class="edit-btn" onclick="editItem('${section}',${item.id})">Edit</button>
-          <button class="delete-btn" onclick="deleteItem('${section}',${item.id},'${item.title}')">Delete</button>
-        </div>`;
-    }
-    list.appendChild(div);
-  });
-}
-
-// Edit
-async function editItem(section,id){
-  const { data } = await client.from(section).select('*').eq('id', id).single();
-  document.getElementById(section+'Id').value=data.id;
-  if(section==="pdf"){
-    document.getElementById("pdfTopic").value=data.topic;
-    document.getElementById("pdfLevel").value=data.level;
-    if(data.pdf_url){
-      const preview=document.getElementById("pdfPreview");
-      preview.textContent="📄 Existing PDF";
-      preview.style.display='block';
-    }
-  } else {
-    document.getElementById(section+'Title').value=data.title;
-    if(document.getElementById(section+'Content')) document.getElementById(section+'Content').value=data.content;
-    if(document.getElementById(section+'Date')) document.getElementById(section+'Date').value=data.date||'';
-    if(data.image_url){
-      const preview=document.getElementById(section+'Preview');
-      if(preview){ preview.src=data.image_url; preview.style.display='block'; }
-    }
+  const list = document.getElementById(section+'List');
+  if (!list) return;
+  try {
+    const { data } = await client.from(section==="pdf"?"pdf":section).select('*').order('id',{ascending:false});
+    list.innerHTML = '';
+    if(!data || data.length===0){ list.innerHTML="<p>No items yet.</p>"; return; }
+    data.forEach(item=>{
+      const div=document.createElement('div');
+      div.className='item';
+      if(section==="pdf"){
+        div.innerHTML=`
+          <div class="item-details">
+            <strong>${item.topic}</strong> (${item.level||""})<br>
+            ${item.pdf_url?`<a href="${item.pdf_url}" target="_blank">📄 View PDF</a>`:""}
+          </div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="editItem('pdf',${item.id})">Edit</button>
+            <button class="delete-btn" onclick="deleteItem('pdf',${item.id},'${item.topic}')">Delete</button>
+          </div>`;
+      } else {
+        div.innerHTML=`
+          <div class="item-details">
+            <strong>${item.title}</strong>${item.date? ` (${item.date})` : ''}<br>
+            ${item.content||''}
+            ${item.image_url ? `<br><img src="${item.image_url}" style="max-height:150px; margin-top:5px; border-radius:6px;">` : ''}
+          </div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="editItem('${section}',${item.id})">Edit</button>
+            <button class="delete-btn" onclick="deleteItem('${section}',${item.id},'${item.title}')">Delete</button>
+          </div>`;
+      }
+      list.appendChild(div);
+    });
+  } catch(err) {
+    console.error("❌ loadItems error for", section, err);
+    list.innerHTML = "<p>Failed to load items.</p>";
   }
 }
 
-// Delete
-async function deleteItem(section,id,title){
-  if(!confirm('Are you sure?')) return;
-  await client.from(section).delete().eq('id',id);
-  await logHistory(section,"delete",title);
-  loadItems(section);
-  showPopup("🗑️ Deleted successfully!");
+// ============================
+// EDIT (generic)
+// ============================
+async function editItem(section,id){
+  try {
+    const { data } = await client.from(section).select('*').eq('id', id).single();
+    if (!data) return;
+    const idEl = document.getElementById(section+'Id');
+    if (idEl) idEl.value = data.id;
+
+    if(section==="pdf"){
+      if (document.getElementById("pdfTopic")) document.getElementById("pdfTopic").value = data.topic;
+      if (document.getElementById("pdfLevel")) document.getElementById("pdfLevel").value = data.level;
+      if(data.pdf_url){
+        const preview=document.getElementById("pdfPreview");
+        if (preview) { preview.textContent="📄 Existing PDF"; preview.style.display='block'; }
+      }
+    } else {
+      if (document.getElementById(section+'Title')) document.getElementById(section+'Title').value = data.title;
+      if (document.getElementById(section+'Content')) document.getElementById(section+'Content').value = data.content;
+      if (document.getElementById(section+'Date')) document.getElementById(section+'Date').value = data.date || '';
+      if(data.image_url){
+        const preview=document.getElementById(section+'Preview');
+        if(preview){ preview.src=data.image_url; preview.style.display='block'; }
+      }
+    }
+  } catch(err) {
+    console.error("❌ editItem error:", err);
+    showPopup("❌ Failed to load item for edit.");
+  }
 }
 
-// History
+// ============================
+// DELETE (generic)
+// ============================
+async function deleteItem(section,id,title){
+  if(!confirm('Are you sure?')) return;
+  try {
+    await client.from(section).delete().eq('id',id);
+    await logHistory(section,"delete",title);
+    loadItems(section);
+    showPopup("🗑️ Deleted successfully!");
+  } catch(err) {
+    console.error("❌ deleteItem error:", err);
+    showPopup("❌ Delete failed!");
+  }
+}
+
+// ============================
+// HISTORY
+// ============================
 async function logHistory(section, action, title) {
-  await client.from("history").insert([{ section, action, title }]);
+  try {
+    await client.from("history").insert([{ section, action, title }]);
+  } catch (err) {
+    console.warn("Could not log history:", err);
+  }
 }
 async function loadHistory() {
   const list = document.getElementById("historyList");
+  if (!list) return;
   const { data } = await client.from("history").select("*").order("id", { ascending: false }).limit(50);
   list.innerHTML = "";
   if (!data || data.length === 0) {
@@ -661,26 +813,228 @@ async function loadHistory() {
   });
 }
 
-// ✅ MAINTENANCE FUNCTIONS
-  async function loadMaintenance() {
-    const { data } = await client.from("settings").select("maintenance_mode").eq("id",1).single();
-    if (data) document.getElementById("maintenanceToggle").checked = data.maintenance_mode;
-  }
-  document.getElementById("maintenanceForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const mode = document.getElementById("maintenanceToggle").checked;
-    await client.from("settings").upsert({ id: 1, maintenance_mode: mode });
-    showPopup("⚡ Maintenance mode updated!");
-  });
+// ============================
+// MARKETPLACE FUNCTIONS (FINAL FIXED)
+// ============================
 
-// Attach
-['home','campus','academic','market','pdf'].forEach(section=>{
-  document.getElementById(section+'Form').addEventListener('submit',e=>{
-    e.preventDefault();
-    handleSave(section);
+// Preview handling for multiple images
+const marketFileInput = document.getElementById('marketFiles');
+const marketPreviewContainer = document.getElementById('marketPreviews');
+if (marketFileInput) {
+  marketFileInput.addEventListener('change', () => {
+    if (!marketPreviewContainer) return;
+    marketPreviewContainer.innerHTML = '';
+    const files = marketFileInput.files;
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.maxHeight = '120px';
+        img.style.margin = '5px';
+        img.style.borderRadius = '6px';
+        marketPreviewContainer.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
   });
-  loadItems(section);
-});
+}
+
+// Upload helper (fixed to use 'uploads' bucket)
+async function uploadFile(file, folder = 'market') {
+  try {
+    const fileName = `${Date.now()}-${file.name}`;
+    const path = `${folder}/${fileName}`;
+
+    // Upload to the 'uploads' bucket
+    const { error: uploadError } = await client.storage
+      .from('uploads')
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) {
+      console.error('Upload failed:', uploadError);
+      return null;
+    }
+
+    // Get public URL
+    const { data } = client.storage.from('uploads').getPublicUrl(path);
+    return data.publicUrl;
+  } catch (err) {
+    console.error('uploadFile error:', err);
+    return null;
+  }
+}
+
+// Save / Update product
+async function handleMarketSave() {
+  const form = document.getElementById('marketForm');
+  if (!form) return;
+
+  const id = document.getElementById('marketId').value || null;
+  const title = document.getElementById('marketTitle').value.trim();
+  const descriptionEl = document.getElementById('marketContent') || document.getElementById('marketDescription');
+  const description = descriptionEl ? descriptionEl.value.trim() : '';
+  const price = parseFloat(document.getElementById('marketPrice').value) || 0;
+  const stock = parseInt(document.getElementById('marketStock').value) || 0;
+  const whatsapp = document.getElementById('sellerWhatsapp').value.trim();
+
+  const filesEl = document.getElementById('marketFiles');
+  const files = filesEl ? filesEl.files : [];
+  let imageUrls = [];
+
+  try {
+    // Upload selected files (if any)
+    if (files && files.length > 0) {
+      for (let file of Array.from(files)) {
+        const url = await uploadFile(file, 'market');
+        if (url) imageUrls.push(url);
+      }
+    }
+
+    if (id) {
+      // If updating existing product, keep old images if none newly uploaded
+      const { data: existing, error: exErr } = await client.from('market').select('images').eq('id', id).single();
+      if (exErr) throw exErr;
+
+      const finalImages = imageUrls.length > 0 ? imageUrls : (existing?.images || []);
+      const { error: upErr } = await client.from('market').update({
+        title, description, price, stock, whatsapp, images: finalImages
+      }).eq('id', id);
+      if (upErr) throw upErr;
+
+      showPopup('✅ Product updated!');
+    } else {
+      // New product
+      const { error: insErr } = await client.from('market').insert({
+        title, description, price, stock, whatsapp, images: imageUrls
+      });
+      if (insErr) throw insErr;
+      showPopup('✅ Product saved!');
+    }
+
+    form.reset();
+    if (marketFileInput) marketFileInput.value = '';
+    if (marketPreviewContainer) marketPreviewContainer.innerHTML = '';
+
+    await loadMarketItems();
+
+  } catch (err) {
+    console.error('❌ handleMarketSave error:', err);
+    const msg = err?.message || JSON.stringify(err) || 'Unknown error';
+    showPopup('❌ Failed to save product: ' + msg);
+  }
+}
+
+// Load marketplace products
+async function loadMarketItems() {
+  const list = document.getElementById('marketList');
+  if (!list) return;
+  list.innerHTML = '<p>Loading...</p>';
+  try {
+    const { data, error } = await client.from('market').select('*').order('id', { ascending: false });
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p>No products yet.</p>';
+      return;
+    }
+
+    list.innerHTML = '';
+    data.forEach(item => {
+      const imagesHtml = (item.images || []).map(url => `<img src="${url}" style="max-height:100px; margin:5px; border-radius:5px;">`).join('');
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `
+        <div class="item-details">
+          <strong>${item.title}</strong><br>
+          <p>${item.description || ''}</p>
+          <p><b>₦${item.price}</b> | Stock: ${item.stock}</p>
+          <p>WhatsApp: <a href="https://wa.me/${item.whatsapp}" target="_blank">${item.whatsapp}</a></p>
+          ${imagesHtml}
+        </div>
+        <div class="item-actions">
+          <button class="edit-btn" onclick="editMarketItem(${item.id})">✏️ Edit</button>
+          <button class="delete-btn" onclick="deleteMarketItem(${item.id}, '${(item.title||'').replace(/'/g,"\\'")}')">🗑️ Delete</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  } catch (err) {
+    console.error('❌ loadMarketItems failed:', err);
+    showPopup('⚠️ Failed to load products: ' + (err?.message || ''));
+    list.innerHTML = '<p>⚠️ Failed to load products.</p>';
+  }
+}
+
+// Edit product
+async function editMarketItem(id) {
+  try {
+    const { data, error } = await client.from('market').select('*').eq('id', id).single();
+    if (error || !data) return showPopup('❌ Failed to load product for edit.');
+    document.getElementById('marketId').value = data.id;
+    document.getElementById('marketTitle').value = data.title || '';
+    if (document.getElementById('marketContent')) document.getElementById('marketContent').value = data.description || '';
+    if (document.getElementById('marketDescription')) document.getElementById('marketDescription').value = data.description || '';
+    document.getElementById('marketPrice').value = data.price || 0;
+    document.getElementById('marketStock').value = data.stock || 0;
+    document.getElementById('sellerWhatsapp').value = data.whatsapp || '';
+
+    if (marketPreviewContainer) {
+      marketPreviewContainer.innerHTML = '';
+      (data.images || []).forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.style.maxHeight = '120px';
+        img.style.margin = '5px';
+        img.style.borderRadius = '6px';
+        marketPreviewContainer.appendChild(img);
+      });
+    }
+    showPopup('📝 Product ready for editing.');
+  } catch (err) {
+    console.error('❌ editMarketItem error:', err);
+    showPopup('❌ Failed to load product for edit.');
+  }
+}
+
+// Delete product
+async function deleteMarketItem(id, title) {
+  if (!confirm(`Delete "${title}"?`)) return;
+  try {
+    const { error } = await client.from('market').delete().eq('id', id);
+    if (error) throw error;
+    showPopup(`🗑️ Deleted ${title}`);
+    await loadMarketItems();
+  } catch (err) {
+    console.error('❌ deleteMarketItem error:', err);
+    showPopup('❌ Delete failed!');
+  }
+}
+
+// Attach marketplace form listener
+const marketFormEl = document.getElementById('marketForm');
+if (marketFormEl) {
+  marketFormEl.addEventListener('submit', e => {
+    e.preventDefault();
+    handleMarketSave();
+  });
+}
+// ============================
+// Attach Section Forms (generic) — remove "market" here
+// ============================
+function attachSectionForms() {
+  ['home', 'campus', 'academic', 'pdf'].forEach(section => {
+    const form = document.getElementById(section + 'Form');
+    if (form) {
+      form.removeEventListener && form.removeEventListener('submit', form._handler);
+      const handler = (e) => { e.preventDefault(); handleSave(section); };
+      form.addEventListener('submit', handler);
+      form._handler = handler;
+      loadItems(section);
+    }
+  });
+}
 </script>
 </body>
 </html>
