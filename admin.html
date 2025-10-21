@@ -110,18 +110,36 @@
     <h2>Manage Home Content</h2>
     <form id="homeForm">
       <input type="hidden" id="homeId">
+
+      <!-- Title -->
       <input type="text" id="homeTitle" placeholder="Title" required>
+
+      <!-- Author -->
+      <input type="text" id="homeAuthor" placeholder="Author name" required>
+
+      <!-- Content -->
       <textarea id="homeContent" placeholder="Content" rows="4" required></textarea>
+
+      <!-- Date -->
       <input type="date" id="homeDate" required>
+
+      <!-- Image Upload -->
       <div class="drop-zone" id="homeDropZone">
         Drag & drop an image or click to select
         <input type="file" id="homeFile">
       </div>
+
+      <!-- Image Preview -->
       <img id="homePreview" class="file-preview" src="" alt="">
+
+      <!-- Save Button -->
       <button type="submit" class="save-btn">Save</button>
     </form>
+
+    <!-- Item List -->
     <div class="item-list" id="homeList"></div>
   </div>
+
 
 <!-- 💳 PDF PAYMENT MANAGEMENT -->
 <div id="pdfPayments" class="tab-content">
@@ -708,46 +726,61 @@ function safeSetupDropZones() {
 // ============================
 // SAVE / EDIT GENERIC (home, campus, academic, pdf)
 // ============================
-async function handleSave(section){
-  const form = document.getElementById(section+'Form');
+async function handleSave(section) {
+  const form = document.getElementById(section + 'Form');
   if (!form) return;
-  const idEl = document.getElementById(section+'Id');
+
+  const idEl = document.getElementById(section + 'Id');
   const id = idEl ? idEl.value : null;
   let fileUrl = null;
 
-  if(section==="pdf"){
+  // ✅ Get author name from input (or default)
+  const authorInput = document.getElementById(section + 'Author');
+  const authorName = authorInput && authorInput.value.trim()
+    ? authorInput.value.trim()
+    : "Eyes of 3080 Admin";
+
+  // ============================
+  // PDF SECTION
+  // ============================
+  if (section === "pdf") {
     const topic = document.getElementById("pdfTopic").value;
     const level = document.getElementById("pdfLevel").value;
     const fileInput = document.getElementById("pdfFile");
     if (fileInput && fileInput.files[0]) fileUrl = await uploadFile(fileInput.files[0], section);
 
     if (id) {
-      const updates = { topic, level };
+      const updates = { topic, level, author: authorName };
       if (fileUrl) updates.pdf_url = fileUrl;
       await client.from("pdf").update(updates).eq("id", id);
       await logHistory("pdf", "update", topic);
     } else {
-      const newItem = { topic, level };
+      const newItem = { topic, level, author: authorName };
       if (fileUrl) newItem.pdf_url = fileUrl;
       await client.from("pdf").insert(newItem);
       await logHistory("pdf", "add", topic);
     }
     loadItems("pdf");
-  } else {
-    const title = document.getElementById(section+'Title') ? document.getElementById(section+'Title').value : '';
-    const content = document.getElementById(section+'Content') ? document.getElementById(section+'Content').value : '';
-    const date = document.getElementById(section+'Date') ? document.getElementById(section+'Date').value : null;
-    const fileInput = document.getElementById(section+'File');
+  }
+
+  // ============================
+  // OTHER SECTIONS (home, campus, academic, etc.)
+  // ============================
+  else {
+    const title = document.getElementById(section + 'Title')?.value || '';
+    const content = document.getElementById(section + 'Content')?.value || '';
+    const date = document.getElementById(section + 'Date')?.value || null;
+    const fileInput = document.getElementById(section + 'File');
     if (fileInput && fileInput.files[0]) fileUrl = await uploadFile(fileInput.files[0], section);
 
     if (id) {
-      const updates = { title, content };
+      const updates = { title, content, author: authorName };
       if (date) updates.date = date;
       if (fileUrl) updates.image_url = fileUrl;
       await client.from(section).update(updates).eq("id", id);
       await logHistory(section, "update", title);
     } else {
-      const newItem = { title, content };
+      const newItem = { title, content, author: authorName };
       if (date) newItem.date = date;
       if (fileUrl) newItem.image_url = fileUrl;
       await client.from(section).insert(newItem);
@@ -756,9 +789,13 @@ async function handleSave(section){
     loadItems(section);
   }
 
+  // ============================
+  // RESET FORM & PREVIEW
+  // ============================
   if (form) form.reset();
-  const preview = document.getElementById(section==="pdf"? "pdfPreview":section+'Preview');
-  if (preview) preview.style.display='none';
+  const preview = document.getElementById(section === "pdf" ? "pdfPreview" : section + 'Preview');
+  if (preview) preview.style.display = 'none';
+
   showPopup("✅ Saved successfully!");
 }
 
