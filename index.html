@@ -3,147 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eyes of 3080 Admin Panel</title>
-
-<!-- Favicon -->
-<link rel="icon" type="image/png" href="https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo">
+<title>Welcome | EYES OF 3080</title>
 
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body, html {
-  width: 100%; height: 100%;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #0a5a2b, #155e36);
-  display: flex; justify-content: center; align-items: center;
-  overflow: hidden; color: #fff;
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:Segoe UI,Tahoma,sans-serif;
+  background:linear-gradient(135deg,#2d5016,#4a7c2a);
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-/* Welcome container */
-.welcome {
-  text-align: center;
-  padding: 50px 40px;
-  border-radius: 20px;
-  background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 40px rgba(0,255,0,0.3);
-  animation: fadeIn 1.5s ease forwards;
-  max-width: 400px;
-  width: 90%;
+/* MAIN WRAPPER */
+.wrapper{
+  text-align:center;
+  padding:30px 20px;
+  max-width:500px;
 }
-@keyframes fadeIn { 0%{opacity:0; transform: scale(0.9);} 100%{opacity:1; transform: scale(1);} }
 
-.welcome img {
-  width:130px; height:130px;
+/* LOGO */
+.logo{
+  width:90px;
+  height:90px;
+  object-fit:contain;
   border-radius:50%;
+  background:#fff;
+  padding:10px;
   margin-bottom:20px;
-  border:3px solid rgba(0,255,0,0.5);
-  box-shadow: 0 0 20px rgba(0,255,0,0.6);
-  transition: transform 0.3s;
-}
-.welcome img:hover { transform: scale(1.05); }
-
-h1 { font-size: 2rem; margin-bottom:10px; letter-spacing:1px; }
-p { font-size:1rem; color:#c3ffc3; margin-bottom:15px; }
-
-/* Description */
-.description {
-  font-size: 0.95rem;
-  color: #d0ffd0;
-  margin-bottom:25px;
-  line-height: 1.5;
 }
 
-/* Enter button */
-.enter-btn {
-  padding:15px 35px;
+/* TITLE */
+.title{
+  font-size:2.2rem;
+  font-weight:800;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  font-size:1rem;
+  opacity:.9;
+  margin-bottom:35px;
+  line-height:1.6;
+}
+
+/* BUTTONS */
+.actions{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.btn{
+  padding:14px;
+  border-radius:30px;
   font-size:1rem;
   font-weight:600;
-  color:#fff;
-  background: linear-gradient(90deg, #0a5a2b, #33cc66);
-  border:none; border-radius:50px;
-  cursor:pointer;
-  box-shadow: 0 4px 12px rgba(0,255,0,0.4);
-  transition: all 0.3s ease;
-}
-.enter-btn:hover {
-  background: linear-gradient(90deg, #33cc66, #0a5a2b);
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(0,255,0,0.6);
+  text-decoration:none;
+  transition:.3s;
 }
 
-/* Background particles */
-canvas {
-  position:absolute; top:0; left:0; width:100%; height:100%; z-index:0;
+.btn-primary{
+  background:#fff;
+  color:#2d5016;
+}
+.btn-primary:hover{
+  background:#e8f5e9;
+}
+
+.btn-outline{
+  border:2px solid #fff;
+  color:#fff;
+}
+.btn-outline:hover{
+  background:rgba(255,255,255,.15);
+}
+
+/* FOOTER TEXT */
+.footer-text{
+  margin-top:40px;
+  font-size:.85rem;
+  opacity:.85;
 }
 </style>
 </head>
+
 <body>
 
-<canvas id="particles"></canvas>
+<div class="wrapper">
 
-<div class="welcome">
-  <img src="https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo" alt="EYES OF 3080 Logo">
-  <h1>👁️ Eyes of 3080 Admin Panel</h1>
-  <p class="description">Your central hub to manage all UNIOSUN news, campus gist, academic updates, marketplace listings, and PDF resources. Efficient, professional, and easy to navigate.</p>
-  <button class="enter-btn" onclick="goToAdmin()">Enter Admin Panel</button>
+  <img 
+    src="https://zvnovocoayqomdilidte.supabase.co/storage/v1/object/public/uploads/6a8f3e57-3d27-47f5-9b5e-22a7070fc442.jpeg" 
+    alt="Eyes of 3080 Logo"
+    class="logo"
+  >
+
+  <div class="title">EYES OF 3080 ADMIN PANEL</div>
+
+  <div class="subtitle">
+    Your academic hub for news, CBT practice, PDFs, and resources
+    designed for students.
+  </div>
+
+  <div class="actions">
+    <a href="admin.html" class="btn btn-primary">Enter Site</a>
+  </div>
+
+  <div class="footer-text">
+    © 2025 EYES OF 3080
+  </div>
+
 </div>
-
-<script>
-// Redirect function
-function goToAdmin(){ window.location.href = "admin.html"; }
-
-// === Particles ===
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-let w = canvas.width = window.innerWidth;
-let h = canvas.height = window.innerHeight;
-window.addEventListener('resize', ()=>{ w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; });
-
-class Particle {
-  constructor(){ 
-    this.x=Math.random()*w; this.y=Math.random()*h; this.size=Math.random()*2+1;
-    this.speedX=(Math.random()-0.5)*1.2; this.speedY=(Math.random()-0.5)*1.2;
-  }
-  update(){ 
-    this.x+=this.speedX; this.y+=this.speedY; 
-    if(this.x<0||this.x>w) this.speedX*=-1; 
-    if(this.y<0||this.y>h) this.speedY*=-1; 
-  }
-  draw(){ 
-    ctx.beginPath(); 
-    ctx.arc(this.x,this.y,this.size,0,Math.PI*2); 
-    ctx.fillStyle='rgba(0,255,0,0.6)'; 
-    ctx.fill(); 
-  }
-}
-const particles=[]; for(let i=0;i<120;i++) particles.push(new Particle());
-
-function connectParticles(){ 
-  for(let a=0;a<particles.length;a++){ 
-    for(let b=a;b<particles.length;b++){
-      let dx=particles[a].x-particles[b].x, dy=particles[a].y-particles[b].y;
-      let dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<100){ 
-        ctx.beginPath(); 
-        ctx.strokeStyle=`rgba(0,255,0,${1-dist/100})`;
-        ctx.moveTo(particles[a].x,particles[a].y); 
-        ctx.lineTo(particles[b].x,particles[b].y); 
-        ctx.stroke(); 
-      }
-    }
-  }
-}
-
-function animate(){ 
-  ctx.clearRect(0,0,w,h); 
-  particles.forEach(p=>{p.update(); p.draw();}); 
-  connectParticles(); 
-  requestAnimationFrame(animate); 
-}
-animate();
-</script>
 
 </body>
 </html>
-
- 
