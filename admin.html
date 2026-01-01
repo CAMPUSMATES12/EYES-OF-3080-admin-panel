@@ -1,1142 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EYES OF 3080 Admin Panel</title>
-  <link rel="icon" type="image/png" href="https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo">
-  <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-  body { background:#f1fdf5; color:#0a5a2b; }
-  header { display:flex; align-items:center; justify-content:center; padding:15px 20px; background:#0a5a2b; color:#fff; }
-  header img { height:50px; border-radius:50%; margin-right:10px; }
-  header h1 { font-size:1.5rem; }
-  nav { display:flex; justify-content:center; margin:20px 0; flex-wrap:wrap; }
-  nav button { background:#33cc99; color:#fff; padding:10px 20px; border:none; margin:5px; border-radius:50px; cursor:pointer; transition:0.3s; }
-  nav button.active, nav button:hover { background:#0a5a2b; }
-  main { max-width:900px; margin:0 auto; padding:20px; }
-  .tab-content { display:none; }
-  .tab-content.active { display:block; }
-  form { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:30px; position:relative; }
-  input, textarea { width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
-  button.save-btn { background:#33cc99; color:#fff; padding:12px 20px; border:none; border-radius:50px; cursor:pointer; transition:0.3s; }
-  button.save-btn:hover { background:#0a5a2b; }
-  .item-list { margin-top:20px; }
-  .item { background:#fff; padding:20px; margin:10px 0; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
-  .item-actions button { margin-left:10px; padding:8px 16px; border:none; border-radius:50px; cursor:pointer; font-weight:600; }
-  .item-actions .edit-btn { background:#33cc99; color:#fff; }
-  .item-actions .delete-btn { background:#ff4d4d; color:#fff; }
-  .file-preview { margin:10px 0; max-height:200px; border-radius:8px; object-fit:cover; display:block; }
-  .drop-zone { padding:20px; border:2px dashed #0a5a2b; border-radius:12px; text-align:center; color:#666; margin:10px 0; cursor:pointer; position:relative; }
-  .drop-zone.dragover { background:rgba(0,90,43,0.1); border-color:#155e36; color:#0a5a2b; }
-  .drop-zone input[type=file] { position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; }
-  #popupMessage { position: fixed; top: 20px; right: 20px; background: #0a5a2b; color: #fff; padding: 12px 20px; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transform: translateY(-20px); transition: all 0.4s ease; z-index: 9999; }
-  #popupMessage.show { opacity: 1; transform: translateY(0); }
-  /* ===== PAYMENT CARD STYLES ===== */
-.payment-card {
-  border: 2px solid #00b894; /* green border */
-  border-radius: 10px;
-  padding: 15px;
-  margin: 10px 0;
-  background: linear-gradient(145deg, #e0f8e0, #c6f0c6); /* light green gradient */
-  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel | EYES OF 3080</title>
 
-.payment-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 184, 148, 0.4);
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:Segoe UI,Tahoma,sans-serif;
+  background:#f4f6f5;
+  color:#222;
 }
+header{
+  background:linear-gradient(135deg,#2d5016,#4a7c2a);
+  color:#fff;
+}
+.header-container{
+  max-width:1200px;
+  margin:auto;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo-img{width:38px;height:38px}
+.logo-text{font-size:1.4rem;font-weight:bold}
 
-.payment-card button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s ease;
+.container{
+  max-width:1000px;
+  margin:30px auto;
+  padding:0 20px;
 }
+h1{margin-bottom:20px;color:#2d5016}
 
-.payment-card button.verify-btn {
-  background: #00b894;
-  color: #fff;
+.section{
+  background:#fff;
+  padding:22px;
+  border-radius:14px;
+  margin-bottom:25px;
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
 }
+.section h2{margin-bottom:15px;color:#2d5016}
 
-.payment-card button.verify-btn:hover {
-  background: #00a17a;
+input,textarea,select{
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
 }
+textarea{min-height:90px}
 
-.payment-card button.pending-btn {
-  background: #ff9800;
-  color: #fff;
+button{
+  padding:10px 18px;
+  border:none;
+  border-radius:8px;
+  background:#2d5016;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
 }
+button:hover{opacity:.9}
 
-.payment-card button.pending-btn:hover {
-  background: #e68a00;
-}
+link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#003c94">
+<link rel="apple-touch-icon" href="icons/icon-192x192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-.payment-card button.delete-btn {
-  background: #b00020;
-  color: #fff;
-}
-
-.payment-card button.delete-btn:hover {
-  background: #8a0018;
-}
-  </style>
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</style>
 </head>
+
 <body>
 
 <header>
-  <img src="https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo" alt="Logo">
-  <h1>EYES OF 3080 Admin Panel</h1>
+  <div class="header-container">
+    <img src="https://zvnovocoayqomdilidte.supabase.co/storage/v1/object/public/uploads/6a8f3e57-3d27-47f5-9b5e-22a7070fc442.jpeg" class="logo-img">
+    <span class="logo-text">EYES OF 3080 — Admin</span>
+  </div>
 </header>
 
-<nav>
-  <button onclick="openTab('home')" class="active">Home</button>
-  <button onclick="openTab('campus')">Campus Gist</button>
-  <button onclick="openTab('academic')">Academic Updates</button>
-  <button onclick="openTab('marketplace')">Marketplace</button>
-  <button onclick="openTab('pdfs')">PDFs</button>
-  <button onclick="openTab('history')">History</button>
-  <button onclick="openTab('maintenance')">Maintenance</button>
- <button onclick="openTab('pdfPayments')">💳 PDF Payments</button>
-</nav>
+<div class="container">
+<h1>Dashboard</h1>
 
-<main>
-  <!-- HOME -->
-  <div id="home" class="tab-content active">
-    <h2>Manage Home Content</h2>
-    <form id="homeForm">
-      <input type="hidden" id="homeId">
-
-      <!-- Title -->
-      <input type="text" id="homeTitle" placeholder="Title" required>
-
-      <!-- Author -->
-      <input type="text" id="homeAuthor" placeholder="Author name" required>
-
-      <!-- Content -->
-      <textarea id="homeContent" placeholder="Content" rows="4" required></textarea>
-
-      <!-- Date -->
-      <input type="date" id="homeDate" required>
-
-      <!-- Image Upload -->
-      <div class="drop-zone" id="homeDropZone">
-        Drag & drop an image or click to select
-        <input type="file" id="homeFile">
-      </div>
-
-      <!-- Image Preview -->
-      <img id="homePreview" class="file-preview" src="" alt="">
-
-      <!-- Save Button -->
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-
-    <!-- Item List -->
-    <div class="item-list" id="homeList"></div>
-  </div>
-
-
-<!-- 💳 PDF PAYMENT MANAGEMENT -->
-<div id="pdfPayments" class="tab-content">
-  <h2 style="color:#006400;">💳 Manage PDF Payments</h2>
-
-  <!-- Payment Form -->
-  <form id="paymentForm" style="margin-top:15px;">
-    <input type="hidden" id="paymentId">
-
-    <div style="display:flex; flex-wrap:wrap; gap:10px;">
-      <input type="text" id="paymentFullName" placeholder="Full Name" required style="flex:1; min-width:200px;">
-      <input type="email" id="paymentEmail" placeholder="Email" required style="flex:1; min-width:200px;">
-    </div>
-
-    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
-      <input type="text" id="paymentTransactionId" placeholder="Transaction ID" required style="flex:1; min-width:200px;">
-      <input type="number" id="paymentAmount" placeholder="Amount (₦)" value="500" required style="flex:1; min-width:200px;">
-    </div>
-
-    <select id="paymentStatus" required style="margin-top:10px; width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
-      <option value="">-- Select Status --</option>
-      <option value="pending">Pending</option>
-      <option value="verified">Verified ✅</option>
-    </select>
-
-    <!-- Optional Proof Upload -->
-    <div class="drop-zone" id="proofDropZone" style="margin-top:12px;">
-      📎 Upload proof (optional)
-      <input type="file" id="paymentProof" accept="image/*,application/pdf">
-    </div>
-    <img id="proofPreview" class="file-preview" src="" alt="">
-
-    <button type="submit" class="save-btn" style="
-      margin-top:12px;
-      background:#006400;
-      color:white;
-      padding:10px 20px;
-      border:none;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:600;">💾 Save / Update Payment</button>
-  </form>
-
-  <!-- Payment List -->
-  <div id="paymentList" class="item-list" style="margin-top:25px;">
-    <h3 style="color:#006400;">📋 All PDF Payments</h3>
-    <p style="font-size:14px; color:#555;">View, verify, or manage user payments below.</p>
-  </div>
+<!-- NEWS -->
+<div class="section">
+<h2>Publish News</h2>
+<input id="newsTitle" placeholder="News title">
+<input type="file" id="newsImage" accept="image/*">
+<textarea id="newsContent" placeholder="News content"></textarea>
+<button onclick="uploadNews()">Publish</button>
 </div>
 
-  <!-- CAMPUS -->
-  <div id="campus" class="tab-content">
-    <h2>Manage Campus Gist</h2>
-    <form id="campusForm">
-      <input type="hidden" id="campusId">
-      <input type="text" id="campusTitle" placeholder="Title" required>
-      <textarea id="campusContent" placeholder="Content" rows="4" required></textarea>
-      <div class="drop-zone" id="campusDropZone">
-        Drag & drop an image or click to select
-        <input type="file" id="campusFile">
-      </div>
-      <img id="campusPreview" class="file-preview" src="" alt="">
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="campusList"></div>
-  </div>
+<!-- PDF / COURSE FILES -->
+<div class="section">
+  <h2>Upload Course PDF</h2>
 
-  <!-- ACADEMIC -->
-  <div id="academic" class="tab-content">
-    <h2>Manage Academic Updates</h2>
-    <form id="academicForm">
-      <input type="hidden" id="academicId">
-      <input type="text" id="academicTitle" placeholder="Title" required>
-      <textarea id="academicContent" placeholder="Content" rows="4" required></textarea>
-      <div class="drop-zone" id="academicDropZone">
-        Drag & drop an image or click to select
-        <input type="file" id="academicFile">
-      </div>
-      <img id="academicPreview" class="file-preview" src="" alt="">
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="academicList"></div>
-  </div>
+  <!-- Course code (admin types only this) -->
+<input
+  id="courseCode"
+  placeholder="Course Code (e.g BIO101)"
+  onblur="loadCourseDetails()"
+>
 
-<!-- MARKETPLACE -->
-<div id="marketplace" class="tab-content">
-  <h2>🛍️ Manage Marketplace</h2>
+<input
+  id="courseTitle"
+  placeholder="Course Title"
+>
 
-  <form id="marketForm">
-    <input type="hidden" id="marketId">
+<select id="courseLevel">
+  <option value="">Select Level</option>
+  <option value="100">100 Level</option>
+  <option value="200">200 Level</option>
+  <option value="300">300 Level</option>
+  <option value="400">400 Level</option>
+  <option value="500">500 Level</option>
+</select>
 
-    <!-- Product Name -->
-    <input type="text" id="marketTitle" placeholder="Product Name" required>
+  <input
+    id="fileTitle"
+    placeholder="File Title (e.g Lecture Notes)"
+  >
 
-    <!-- Description -->
-    <textarea id="marketDescription" placeholder="Product Description" rows="3" required></textarea>
+  <input
+    type="file"
+    id="pdfFile"
+    accept="application/pdf"
+  >
 
-    <!-- Price -->
-    <input type="number" id="marketPrice" placeholder="Price (₦)" required>
-
-    <!-- Stock Quantity -->
-    <input type="number" id="marketStock" placeholder="Stock Quantity" value="1" required>
-
-    <!-- Seller WhatsApp -->
-    <input type="text" id="sellerWhatsapp" placeholder="Seller WhatsApp Number (e.g. 2348012345678)" required>
-
-    <!-- Image Upload -->
-    <div class="drop-zone" id="marketDropZone">
-      Drag & drop images or click to select
-      <input type="file" id="marketFiles" multiple accept="image/*">
-    </div>
-
-    <!-- Preview Section -->
-    <div id="marketPreviews" class="previews" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;"></div>
-
-    <button type="submit" class="save-btn" style="margin-top:15px;">Save</button>
-  </form>
-
-  <h3 style="margin-top:30px;">Existing Products</h3>
-  <div class="item-list" id="marketList"></div>
+  <button onclick="uploadCourseFile()">Upload PDF</button>
 </div>
 
-<!-- Optional CSS for Previews -->
-<style>
-  .drop-zone {
-    border: 2px dashed #aaa;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    margin-bottom: 10px;
-    border-radius: 6px;
-  }
-  .drop-zone.dragover {
-    border-color: #555;
-    background-color: #f9f9f9;
-  }
-  .previews img {
-    max-height: 120px;
-    margin: 5px;
-    border-radius: 6px;
-  }
-  .item-list .item {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 6px;
-  }
-  .item-actions button {
-    margin-right: 5px;
-  }
-</style>
-  <!-- PDF -->
-  <div id="pdfs" class="tab-content">
-    <h2>Manage PDFs</h2>
-    <form id="pdfForm">
-      <input type="hidden" id="pdfId">
-      <input type="text" id="pdfTopic" placeholder="Topic" required>
-      <input type="text" id="pdfLevel" placeholder="Level (e.g. 100L)">
-      <div class="drop-zone" id="pdfDropZone">
-        Drag & drop a PDF or click to select
-        <input type="file" id="pdfFile" accept="application/pdf" required>
-      </div>
-      <div id="pdfPreview" class="file-preview" style="display:none;"></div>
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-    <div class="item-list" id="pdfList"></div>
-  </div>
+<!-- CBT -->
+<div class="section">
+<h2> Add CBT Question</h2>
+<input id="cbtCourse" placeholder="Course code">
+<textarea id="cbtQuestion" placeholder="Question"></textarea>
+<input id="optA" placeholder="Option A">
+<input id="optB" placeholder="Option B">
+<input id="optC" placeholder="Option C">
+<input id="optD" placeholder="Option D">
+<select id="cbtAnswer">
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="D">D</option>
+</select>
+<button onclick="addCBT()">Add Question</button>
+</div>
 
-  <!-- HISTORY -->
-  <div id="history" class="tab-content">
-    <h2>History Log</h2>
-    <ul id="historyList"></ul>
-  </div>
+</div>
 
-  <!-- MAINTENANCE -->
-  <div id="maintenance" class="tab-content">
-    <h2>Maintenance Mode</h2>
-    <form id="maintenanceForm">
-      <label>
-        <input type="checkbox" id="maintenanceToggle">
-        Enable Maintenance Mode
-      </label>
-      <br><br>
-      <button type="submit" class="save-btn">Save</button>
-    </form>
-  </div>
-</main>
-
-<!-- Popup -->
-<div id="popupMessage">✅ Saved successfully!</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ============================
-// SUPABASE CONNECTION
-// ============================
-const SUPABASE_URL = "https://vtpsruejncfykiazrfsx.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0cHNydWVqbmNmeWtpYXpyZnN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NDA5NzQsImV4cCI6MjA3MjMxNjk3NH0.UV55gbsSAgnyolxJhIYTaJUpvoJFsJn0_-LMNwhwAK0";
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* ================= SUPABASE ================= */
+const supabaseClient = supabase.createClient(
+  "https://zvnovocoayqomdilidte.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2bm92b2NvYXlxb21kaWxpZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMDM2OTgsImV4cCI6MjA3OTU3OTY5OH0.PcpwASQ3RBRoQVIglxKz-yM3iuYMZMtyQJBh8QNHad8"
+);
 
-// ============================
-// ELEMENTS
-// ============================
-const paymentForm = document.getElementById("paymentForm");
-const paymentList = document.getElementById("paymentList");
+/* ================= LOAD COURSE DETAILS ================= */
+async function loadCourseDetails() {
+  const code = document.getElementById("courseCode").value.trim().toUpperCase();
+  const titleInput = document.getElementById("courseTitle");
+  const levelSelect = document.getElementById("courseLevel");
 
-// ============================
-// LOAD PAYMENTS
-// ============================
-async function loadPayments() {
+  if (!code) return;
+
+  const { data, error } = await supabaseClient
+    .from("courses")
+    .select("*")
+    .eq("course_code", code)
+    .single();
+
+  if (data) {
+    // Course exists
+    titleInput.value = data.course_title;
+    levelSelect.value = data.level || "";
+    titleInput.readOnly = true;
+    levelSelect.disabled = true;
+  } else {
+    // New course
+    titleInput.value = "";
+    levelSelect.value = "";
+    titleInput.readOnly = false;
+    levelSelect.disabled = false;
+  }
+}
+
+/* ================= UPLOAD COURSE FILE ================= */
+async function uploadCourseFile() {
   try {
-    const { data, error } = await client
-      .from("pdf_access")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const courseCode = document.getElementById("courseCode").value.trim().toUpperCase();
+    const courseTitle = document.getElementById("courseTitle").value.trim();
+    const fileTitle = document.getElementById("fileTitle").value.trim();
+    const file = document.getElementById("pdfFile").files[0];
 
-    if (error) throw error;
-
-    if (!data || data.length === 0) {
-      if (paymentList) paymentList.innerHTML = "<p style='color:#555;'>No payments found yet.</p>";
+    if (!courseCode || !courseTitle || !fileTitle || !file) {
+      alert("Please fill all required fields");
       return;
     }
 
-    if (!paymentList) return;
+    // Upsert course using course_code as unique key
+    const { data: course, error: courseError } = await supabaseClient
+      .from("courses")
+      .upsert(
+        { course_code: courseCode, course_title: courseTitle },
+        { onConflict: 'course_code' }
+      )
+      .select()
+      .single();
 
-    paymentList.innerHTML = data
-      .map(payment => `
-        <div id="payment-${payment.id}" class="payment-card" style="
-          border:1px solid ${payment.verified ? '#00b894' : '#ff9800'};
-          border-radius:8px;
-          padding:15px;
-          margin:10px 0;
-          background:#fff;">
-          <strong style="color:#006400;">${payment.full_name || "Unnamed User"}</strong><br>
-          <span>Email:</span> ${payment.email}<br>
-          <span>Txn ID:</span> ${payment.transaction_id || "N/A"}<br>
-          <span>Amount:</span> ₦${payment.amount || 500}<br>
-          <span>Status:</span> 
-            <b id="status-${payment.id}" style="color:${payment.verified ? '#00b894' : '#ff9800'};">
-              ${payment.verified ? "Verified ✅" : "Pending ⏳"}
-            </b><br>
-          ${payment.proof_url ? `<a href="${payment.proof_url}" target="_blank" style="color:#006400;">📎 View Proof</a><br>` : ""}
-          ${payment.verified_at ? `<small style="color:#555;">✔ Verified at ${new Date(payment.verified_at).toLocaleString()}</small><br>` : ""}
-          <div style="margin-top:8px;">
-            ${!payment.verified
-              ? `<button onclick="changePaymentStatus(${payment.id},'verified')" 
-                   id="verifyBtn-${payment.id}"
-                   style="background:#006400;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">
-                   Verify ✅</button>`
-              : `<button onclick="changePaymentStatus(${payment.id},'pending')" 
-                   style="background:#ff9800;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">
-                   Mark Pending</button>`}
-            <button onclick="deletePayment(${payment.id})" 
-              style="background:#b00020;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;margin-left:5px;">
-              🗑 Delete
-            </button>
-          </div>
-        </div>
-      `)
-      .join("");
-  } catch (err) {
-    console.error("❌ Error loading payments:", err);
-    if (paymentList) paymentList.innerHTML = "<p style='color:red;'>Failed to load payments.</p>";
-  }
-}
+    if (courseError) throw courseError;
 
-// ============================
-// CHANGE PAYMENT STATUS
-// ============================
-async function changePaymentStatus(id, status) {
-  id = parseInt(id);
+    // Upload PDF to Supabase storage
+    const fileName = `courses/${course.course_code}/${Date.now()}-${file.name}`;
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from("uploads")
+      .upload(fileName, file);
 
-  let updateObj = {};
-  switch(status) {
-    case 'pending':
-      updateObj = { paid: false, verified: false, verified_at: null };
-      break;
-    case 'verified':
-      updateObj = { paid: true, verified: true, verified_at: new Date().toISOString() };
-      break;
-    default:
-      console.error('Unknown status', status);
-      return;
-  }
+    if (uploadError) throw uploadError;
 
-  try {
-    const { data, error } = await client
-      .from("pdf_access")
-      .update(updateObj)
-      .eq("id", id)
-      .select();
+    const fileUrl = supabaseClient
+      .storage
+      .from("uploads")
+      .getPublicUrl(fileName).data.publicUrl;
 
-    if (error) throw error;
-    if (!data || data.length === 0) throw new Error("No row updated. Check if ID exists.");
-
-    const verified = updateObj.verified === true;
-    updatePaymentCardUI(id, verified);
-
-    // ✅ Send confirmation email if verified
-    if (verified) {
-      const user = data[0]; // Supabase returned the updated row
-
-      emailjs.send("service_7hcax5y", "template_1ecw48o", {
-        username: user.full_name,
-        email: user.email,
-        transactionId: user.transaction_id,
-        amount: user.amount,
-        siteName: "Eyes of 3080"
-      })
-      .then(() => console.log(`✅ Payment confirmation email sent to ${user.email}`))
-      .catch(err => console.error("❌ Email sending failed:", err));
-    }
-
-  } catch(err) {
-    console.error("❌ Failed to update status", err);
-    alert("❌ Failed to update status: " + (err.message || err));
-  }
-}
-
-// ============================
-// DELETE PAYMENT
-// ============================
-async function deletePayment(id) {
-  if (!confirm(`🗑 Are you sure you want to delete this payment?`)) return;
-
-  try {
-    const { error } = await client
-      .from("pdf_access")
-      .delete()
-      .eq("id", id);
-
-    if (error) throw error;
-
-    const card = document.getElementById(`payment-${id}`);
-    if (card) card.remove();
-  } catch (err) {
-    console.error("❌ Delete error:", err);
-    alert("❌ Could not delete payment: " + (err.message || err));
-  }
-}
-
-// ============================
-// UPDATE CARD UI
-// ============================
-function updatePaymentCardUI(id, verified) {
-  const card = document.getElementById(`payment-${id}`);
-  const status = document.getElementById(`status-${id}`);
-  const button = document.getElementById(`verifyBtn-${id}`);
-
-  if (card && status) {
-    card.style.borderColor = verified ? "#00b894" : "#ff9800";
-    status.textContent = verified ? "Verified ✅" : "Pending ⏳";
-    status.style.color = verified ? "#00b894" : "#ff9800";
-  }
-
-  if (button) {
-    button.outerHTML = verified
-      ? `<button onclick="changePaymentStatus(${id},'pending')" style="background:#ff9800;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Mark Pending</button>`
-      : `<button onclick="changePaymentStatus(${id},'verified')" id="verifyBtn-${id}" style="background:#006400;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">Verify ✅</button>`;
-  }
-}
-
-// ============================
-// ADD / UPDATE PAYMENT
-// ============================
-if (paymentForm) {
-  paymentForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const full_name = document.getElementById("paymentFullName").value.trim();
-    const email = document.getElementById("paymentEmail").value.trim();
-    const transaction_id = document.getElementById("paymentTransactionId").value.trim();
-    const amount = parseInt(document.getElementById("paymentAmount").value);
-    const status = document.getElementById("paymentStatus").value;
-
-    const paid = status === "verified";
-    const verified = status === "verified";
-
-    try {
-      const { error } = await client.from("pdf_access").upsert({
-        email,
-        full_name,
-        transaction_id,
-        amount,
-        paid,
-        verified,
-        verified_at: verified ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString(),
+    // Save file record (without level)
+    const { error: saveError } = await supabaseClient
+      .from("course_files")
+      .insert({
+        course_code: course.course_code,
+        title: fileTitle,
+        file_url: fileUrl
       });
 
+    if (saveError) throw saveError;
+
+    alert("✅ PDF uploaded successfully");
+
+    // Reset fields
+    document.getElementById("fileTitle").value = "";
+    document.getElementById("pdfFile").value = "";
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ PDF upload failed: " + err.message);
+  }
+}
+
+
+/* ================= NEWS ================= */
+async function uploadNews() {
+  try {
+    const title = document.getElementById("newsTitle").value.trim();
+    const content = document.getElementById("newsContent").value.trim();
+    const image = document.getElementById("newsImage").files[0];
+
+    if (!title || !content) {
+      alert("Title and content are required");
+      return;
+    }
+
+    let imageUrl = null;
+
+    if (image) {
+      const fileName = `news/${Date.now()}-${image.name}`;
+      const { error } = await supabaseClient.storage.from("uploads").upload(fileName, image);
       if (error) throw error;
-      alert("✅ Payment saved successfully!");
-      paymentForm.reset();
-      loadPayments();
-    } catch (err) {
-      console.error("❌ Error saving payment:", err);
-      alert("❌ Failed to save payment: " + (err.message || err));
+
+      imageUrl = supabaseClient.storage.from("uploads").getPublicUrl(fileName).data.publicUrl;
     }
-  });
-}
 
-// ============================
-// REAL-TIME AUTO UPDATE
-// ============================
-client
-  .channel("pdf_access-changes")
-  .on(
-    "postgres_changes",
-    { event: "*", schema: "public", table: "pdf_access" },
-    (payload) => {
-      console.log("📡 Realtime update:", payload);
-      loadPayments();
-    }
-  )
-  .subscribe();
-
-// ============================
-// INITIAL LOAD
-// ============================
-document.addEventListener("DOMContentLoaded", () => {
-  // Load payments (if the element exists)
-  if (paymentList) loadPayments();
-
-  // Attach drop zones and load other sections
-  safeSetupDropZones();
-  attachSectionForms();
-  loadItems('home');
-  loadItems('campus');
-  loadItems('academic');
-  loadItems('pdf'); // pdf items
-  loadMarketItems(); // marketplace
-});
-
-// ============================
-// UPLOAD + WATERMARK HELPERS
-// ============================
-async function uploadFile(file, section) {
-  try {
-    let uploadFile = file;
-    if (/image\/(png|jpeg|jpg)/i.test(file.type)) {
-      uploadFile = await addWatermark(file);
-    }
-    const fileName = `${section}/${Date.now()}-${file.name}`;
-    const { error } = await client.storage.from("uploads").upload(fileName, uploadFile, { upsert: true });
-    if (error) throw error;
-    const { data } = client.storage.from("uploads").getPublicUrl(fileName);
-    return data.publicUrl;
-  } catch (err) {
-    console.error("❌ File upload failed:", err);
-    showPopup("❌ File upload failed!");
-    return null;
-  }
-}
-
-async function addWatermark(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.src = e.target.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        const logo = new Image();
-        logo.crossOrigin = "anonymous";
-        logo.src = "https://vtpsruejncfykiazrfsx.supabase.co/storage/v1/object/public/PRODUCTS/EYES%20OF%203080%20logo";
-        logo.onload = () => {
-          const logoWidth = img.width * 0.25;
-          const logoHeight = (logo.height / logo.width) * logoWidth;
-          ctx.globalAlpha = 0.85;
-          ctx.drawImage(logo, img.width - logoWidth - 20, img.height - logoHeight - 20, logoWidth, logoHeight);
-          canvas.toBlob((blob) => {
-            resolve(new File([blob], file.name, { type: "image/png" }));
-          }, "image/png");
-        };
-        logo.onerror = reject;
-      };
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-// ============================
-// POPUP
-// ============================
-function showPopup(msg="✅ Saved successfully!"){
-  const popup=document.getElementById("popupMessage");
-  if (!popup) return;
-  popup.textContent=msg;
-  popup.classList.add("show");
-  setTimeout(()=>popup.classList.remove("show"),2500);
-}
-
-// ============================
-// TABS
-// ============================
-function openTab(tabId){
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  const el = document.getElementById(tabId);
-  if (el) el.classList.add('active');
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  const btn = document.querySelector(`nav button[onclick="openTab('${tabId}')"]`);
-  if (btn) btn.classList.add('active');
-  if(tabId === "history") loadHistory();
-  if(tabId === "pdfs") loadItems("pdf");
-  if(tabId === "marketplace") loadMarketItems();
-}
-
-// ============================
-// SAFE DROP ZONE SETUP
-// ============================
-function setupDropZone(dropId,fileId,previewId){
-  const dz = document.getElementById(dropId);
-  const fileInput = document.getElementById(fileId);
-  const preview = previewId ? document.getElementById(previewId) : null;
-  if (!dz || !fileInput) return;
-
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('dragover');
-    fileInput.files = e.dataTransfer.files;
-    // preview handling
-    if (preview && fileInput.files[0]) {
-      if (fileInput.multiple) preview.innerHTML = ''; // clear for multiple
-      preview.style.display = 'block';
-      if (fileInput.multiple) {
-        // show thumbnails for each
-        Array.from(fileInput.files).forEach(file => {
-          const reader = new FileReader();
-          reader.onload = ev => {
-            const img = document.createElement('img');
-            img.src = ev.target.result;
-            img.style.maxHeight = '120px';
-            img.style.margin = '5px';
-            img.style.borderRadius = '6px';
-            preview.appendChild(img);
-          };
-          reader.readAsDataURL(file);
-        });
-      } else {
-        preview.textContent = fileInput.files[0].name;
-      }
-    }
-  });
-
-  fileInput.addEventListener('change', ()=> {
-    if (!preview) return;
-    preview.innerHTML = '';
-    if (!fileInput.files || fileInput.files.length === 0) { preview.style.display='none'; return; }
-    preview.style.display = 'block';
-    Array.from(fileInput.files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.style.maxHeight = '120px';
-        img.style.margin = '5px';
-        img.style.borderRadius = '6px';
-        preview.appendChild(img);
-      };
-      reader.readAsDataURL(file);
+    const { error } = await supabaseClient.from("posts").insert({
+      title,
+      content,
+      image_url: imageUrl
     });
-  });
-}
 
-function safeSetupDropZones() {
-  // map of dropId -> fileId -> previewId
-  const mappings = [
-    { drop: 'homeDropZone', file: 'homeFile', preview: 'homePreview' },
-    { drop: 'campusDropZone', file: 'campusFile', preview: 'campusPreview' },
-    { drop: 'academicDropZone', file: 'academicFile', preview: 'academicPreview' },
-    { drop: 'pdfDropZone', file: 'pdfFile', preview: 'pdfPreview' },
-    // marketplace uses multiple images preview
-    { drop: 'marketDropZone', file: 'marketFiles', preview: 'marketPreviews' },
-    { drop: 'marketplaceDropZone', file: 'marketFiles', preview: 'marketPreviews' } // in case id differs
-  ];
-  mappings.forEach(m => setupDropZone(m.drop, m.file, m.preview));
-}
-
-// ============================
-// SAVE / EDIT GENERIC (home, campus, academic, pdf)
-// ============================
-async function handleSave(section) {
-  const form = document.getElementById(section + 'Form');
-  if (!form) return;
-
-  const idEl = document.getElementById(section + 'Id');
-  const id = idEl ? idEl.value : null;
-  let fileUrl = null;
-
-  // ✅ Get author name from input (or default)
-  const authorInput = document.getElementById(section + 'Author');
-  const authorName = authorInput && authorInput.value.trim()
-    ? authorInput.value.trim()
-    : "Eyes of 3080 Admin";
-
-  // ============================
-  // PDF SECTION
-  // ============================
-  if (section === "pdf") {
-    const topic = document.getElementById("pdfTopic").value;
-    const level = document.getElementById("pdfLevel").value;
-    const fileInput = document.getElementById("pdfFile");
-    if (fileInput && fileInput.files[0]) fileUrl = await uploadFile(fileInput.files[0], section);
-
-    if (id) {
-      const updates = { topic, level, author: authorName };
-      if (fileUrl) updates.pdf_url = fileUrl;
-      await client.from("pdf").update(updates).eq("id", id);
-      await logHistory("pdf", "update", topic);
-    } else {
-      const newItem = { topic, level, author: authorName };
-      if (fileUrl) newItem.pdf_url = fileUrl;
-      await client.from("pdf").insert(newItem);
-      await logHistory("pdf", "add", topic);
-    }
-    loadItems("pdf");
-  }
-
-  // ============================
-  // OTHER SECTIONS (home, campus, academic, etc.)
-  // ============================
-  else {
-    const title = document.getElementById(section + 'Title')?.value || '';
-    const content = document.getElementById(section + 'Content')?.value || '';
-    const date = document.getElementById(section + 'Date')?.value || null;
-    const fileInput = document.getElementById(section + 'File');
-    if (fileInput && fileInput.files[0]) fileUrl = await uploadFile(fileInput.files[0], section);
-
-    if (id) {
-      const updates = { title, content, author: authorName };
-      if (date) updates.date = date;
-      if (fileUrl) updates.image_url = fileUrl;
-      await client.from(section).update(updates).eq("id", id);
-      await logHistory(section, "update", title);
-    } else {
-      const newItem = { title, content, author: authorName };
-      if (date) newItem.date = date;
-      if (fileUrl) newItem.image_url = fileUrl;
-      await client.from(section).insert(newItem);
-      await logHistory(section, "add", title);
-    }
-    loadItems(section);
-  }
-
-  // ============================
-  // RESET FORM & PREVIEW
-  // ============================
-  if (form) form.reset();
-  const preview = document.getElementById(section === "pdf" ? "pdfPreview" : section + 'Preview');
-  if (preview) preview.style.display = 'none';
-
-  showPopup("✅ Saved successfully!");
-}
-
-// ============================
-// LOAD ITEMS (generic for home, campus, academic, pdf)
-// ============================
-async function loadItems(section){
-  const list = document.getElementById(section+'List');
-  if (!list) return;
-  try {
-    const { data } = await client.from(section==="pdf"?"pdf":section).select('*').order('id',{ascending:false});
-    list.innerHTML = '';
-    if(!data || data.length===0){ list.innerHTML="<p>No items yet.</p>"; return; }
-    data.forEach(item=>{
-      const div=document.createElement('div');
-      div.className='item';
-      if(section==="pdf"){
-        div.innerHTML=`
-          <div class="item-details">
-            <strong>${item.topic}</strong> (${item.level||""})<br>
-            ${item.pdf_url?`<a href="${item.pdf_url}" target="_blank">📄 View PDF</a>`:""}
-          </div>
-          <div class="item-actions">
-            <button class="edit-btn" onclick="editItem('pdf',${item.id})">Edit</button>
-            <button class="delete-btn" onclick="deleteItem('pdf',${item.id},'${item.topic}')">Delete</button>
-          </div>`;
-      } else {
-        div.innerHTML=`
-          <div class="item-details">
-            <strong>${item.title}</strong>${item.date? ` (${item.date})` : ''}<br>
-            ${item.content||''}
-            ${item.image_url ? `<br><img src="${item.image_url}" style="max-height:150px; margin-top:5px; border-radius:6px;">` : ''}
-          </div>
-          <div class="item-actions">
-            <button class="edit-btn" onclick="editItem('${section}',${item.id})">Edit</button>
-            <button class="delete-btn" onclick="deleteItem('${section}',${item.id},'${item.title}')">Delete</button>
-          </div>`;
-      }
-      list.appendChild(div);
-    });
-  } catch(err) {
-    console.error("❌ loadItems error for", section, err);
-    list.innerHTML = "<p>Failed to load items.</p>";
-  }
-}
-
-// ============================
-// EDIT (generic)
-// ============================
-async function editItem(section,id){
-  try {
-    const { data } = await client.from(section).select('*').eq('id', id).single();
-    if (!data) return;
-    const idEl = document.getElementById(section+'Id');
-    if (idEl) idEl.value = data.id;
-
-    if(section==="pdf"){
-      if (document.getElementById("pdfTopic")) document.getElementById("pdfTopic").value = data.topic;
-      if (document.getElementById("pdfLevel")) document.getElementById("pdfLevel").value = data.level;
-      if(data.pdf_url){
-        const preview=document.getElementById("pdfPreview");
-        if (preview) { preview.textContent="📄 Existing PDF"; preview.style.display='block'; }
-      }
-    } else {
-      if (document.getElementById(section+'Title')) document.getElementById(section+'Title').value = data.title;
-      if (document.getElementById(section+'Content')) document.getElementById(section+'Content').value = data.content;
-      if (document.getElementById(section+'Date')) document.getElementById(section+'Date').value = data.date || '';
-      if(data.image_url){
-        const preview=document.getElementById(section+'Preview');
-        if(preview){ preview.src=data.image_url; preview.style.display='block'; }
-      }
-    }
-  } catch(err) {
-    console.error("❌ editItem error:", err);
-    showPopup("❌ Failed to load item for edit.");
-  }
-}
-
-// ============================
-// DELETE (generic)
-// ============================
-async function deleteItem(section,id,title){
-  if(!confirm('Are you sure?')) return;
-  try {
-    await client.from(section).delete().eq('id',id);
-    await logHistory(section,"delete",title);
-    loadItems(section);
-    showPopup("🗑️ Deleted successfully!");
-  } catch(err) {
-    console.error("❌ deleteItem error:", err);
-    showPopup("❌ Delete failed!");
-  }
-}
-
-// ============================
-// HISTORY
-// ============================
-async function logHistory(section, action, title) {
-  try {
-    await client.from("history").insert([{ section, action, title }]);
-  } catch (err) {
-    console.warn("Could not log history:", err);
-  }
-}
-async function loadHistory() {
-  const list = document.getElementById("historyList");
-  if (!list) return;
-  const { data } = await client.from("history").select("*").order("id", { ascending: false }).limit(50);
-  list.innerHTML = "";
-  if (!data || data.length === 0) {
-    list.innerHTML = "<li>No history yet...</li>";
-    return;
-  }
-  data.forEach(h => {
-    const li = document.createElement("li");
-    li.textContent = `${new Date(h.timestamp).toLocaleString()} → ${h.action.toUpperCase()} "${h.title}" in ${h.section}`;
-    list.appendChild(li);
-  });
-}
-
-// ============================
-// MARKETPLACE FUNCTIONS (FINAL FIXED)
-// ============================
-
-// Preview handling for multiple images
-const marketFileInput = document.getElementById('marketFiles');
-const marketPreviewContainer = document.getElementById('marketPreviews');
-if (marketFileInput) {
-  marketFileInput.addEventListener('change', () => {
-    if (!marketPreviewContainer) return;
-    marketPreviewContainer.innerHTML = '';
-    const files = marketFileInput.files;
-    if (!files || files.length === 0) return;
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.style.maxHeight = '120px';
-        img.style.margin = '5px';
-        img.style.borderRadius = '6px';
-        marketPreviewContainer.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
-  });
-}
-
-// Upload helper (fixed to use 'uploads' bucket)
-async function uploadFile(file, folder = 'market') {
-  try {
-    const fileName = `${Date.now()}-${file.name}`;
-    const path = `${folder}/${fileName}`;
-
-    // Upload to the 'uploads' bucket
-    const { error: uploadError } = await client.storage
-      .from('uploads')
-      .upload(path, file, { upsert: true });
-
-    if (uploadError) {
-      console.error('Upload failed:', uploadError);
-      return null;
-    }
-
-    // Get public URL
-    const { data } = client.storage.from('uploads').getPublicUrl(path);
-    return data.publicUrl;
-  } catch (err) {
-    console.error('uploadFile error:', err);
-    return null;
-  }
-}
-
-// Save / Update product
-async function handleMarketSave() {
-  const form = document.getElementById('marketForm');
-  if (!form) return;
-
-  const id = document.getElementById('marketId').value || null;
-  const title = document.getElementById('marketTitle').value.trim();
-  const descriptionEl = document.getElementById('marketContent') || document.getElementById('marketDescription');
-  const description = descriptionEl ? descriptionEl.value.trim() : '';
-  const price = parseFloat(document.getElementById('marketPrice').value) || 0;
-  const stock = parseInt(document.getElementById('marketStock').value) || 0;
-  const whatsapp = document.getElementById('sellerWhatsapp').value.trim();
-
-  const filesEl = document.getElementById('marketFiles');
-  const files = filesEl ? filesEl.files : [];
-  let imageUrls = [];
-
-  try {
-    // Upload selected files (if any)
-    if (files && files.length > 0) {
-      for (let file of Array.from(files)) {
-        const url = await uploadFile(file, 'market');
-        if (url) imageUrls.push(url);
-      }
-    }
-
-    if (id) {
-      // If updating existing product, keep old images if none newly uploaded
-      const { data: existing, error: exErr } = await client.from('market').select('images').eq('id', id).single();
-      if (exErr) throw exErr;
-
-      const finalImages = imageUrls.length > 0 ? imageUrls : (existing?.images || []);
-      const { error: upErr } = await client.from('market').update({
-        title, description, price, stock, whatsapp, images: finalImages
-      }).eq('id', id);
-      if (upErr) throw upErr;
-
-      showPopup('✅ Product updated!');
-    } else {
-      // New product
-      const { error: insErr } = await client.from('market').insert({
-        title, description, price, stock, whatsapp, images: imageUrls
-      });
-      if (insErr) throw insErr;
-      showPopup('✅ Product saved!');
-    }
-
-    form.reset();
-    if (marketFileInput) marketFileInput.value = '';
-    if (marketPreviewContainer) marketPreviewContainer.innerHTML = '';
-
-    await loadMarketItems();
-
-  } catch (err) {
-    console.error('❌ handleMarketSave error:', err);
-    const msg = err?.message || JSON.stringify(err) || 'Unknown error';
-    showPopup('❌ Failed to save product: ' + msg);
-  }
-}
-
-// Load marketplace products
-async function loadMarketItems() {
-  const list = document.getElementById('marketList');
-  if (!list) return;
-  list.innerHTML = '<p>Loading...</p>';
-  try {
-    const { data, error } = await client.from('market').select('*').order('id', { ascending: false });
     if (error) throw error;
 
-    if (!data || data.length === 0) {
-      list.innerHTML = '<p>No products yet.</p>';
+    alert("✅ News published successfully");
+
+    // Reset fields
+    document.getElementById("newsTitle").value = "";
+    document.getElementById("newsContent").value = "";
+    document.getElementById("newsImage").value = "";
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ News upload failed: " + err.message);
+  }
+}
+
+/* ================= CBT ================= */
+async function addCBT() {
+  try {
+    const course = document.getElementById("cbtCourse").value.trim().toUpperCase();
+    const question = document.getElementById("cbtQuestion").value.trim();
+    const a = document.getElementById("optA").value.trim();
+    const b = document.getElementById("optB").value.trim();
+    const c = document.getElementById("optC").value.trim();
+    const d = document.getElementById("optD").value.trim();
+    const answer = document.getElementById("cbtAnswer").value;
+
+    if (!course || !question || !a || !b || !c || !d) {
+      alert("Fill all CBT fields");
       return;
     }
 
-    list.innerHTML = '';
-    data.forEach(item => {
-      const imagesHtml = (item.images || []).map(url => `<img src="${url}" style="max-height:100px; margin:5px; border-radius:5px;">`).join('');
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `
-        <div class="item-details">
-          <strong>${item.title}</strong><br>
-          <p>${item.description || ''}</p>
-          <p><b>₦${item.price}</b> | Stock: ${item.stock}</p>
-          <p>WhatsApp: <a href="https://wa.me/${item.whatsapp}" target="_blank">${item.whatsapp}</a></p>
-          ${imagesHtml}
-        </div>
-        <div class="item-actions">
-          <button class="edit-btn" onclick="editMarketItem(${item.id})">✏️ Edit</button>
-          <button class="delete-btn" onclick="deleteMarketItem(${item.id}, '${(item.title||'').replace(/'/g,"\\'")}')">🗑️ Delete</button>
-        </div>
-      `;
-      list.appendChild(div);
+    const { error } = await supabaseClient.from("cbt_questions").insert({
+      course,
+      question,
+      a, b, c, d,
+      answer
     });
-  } catch (err) {
-    console.error('❌ loadMarketItems failed:', err);
-    showPopup('⚠️ Failed to load products: ' + (err?.message || ''));
-    list.innerHTML = '<p>⚠️ Failed to load products.</p>';
-  }
-}
 
-// Edit product
-async function editMarketItem(id) {
-  try {
-    const { data, error } = await client.from('market').select('*').eq('id', id).single();
-    if (error || !data) return showPopup('❌ Failed to load product for edit.');
-    document.getElementById('marketId').value = data.id;
-    document.getElementById('marketTitle').value = data.title || '';
-    if (document.getElementById('marketContent')) document.getElementById('marketContent').value = data.description || '';
-    if (document.getElementById('marketDescription')) document.getElementById('marketDescription').value = data.description || '';
-    document.getElementById('marketPrice').value = data.price || 0;
-    document.getElementById('marketStock').value = data.stock || 0;
-    document.getElementById('sellerWhatsapp').value = data.whatsapp || '';
-
-    if (marketPreviewContainer) {
-      marketPreviewContainer.innerHTML = '';
-      (data.images || []).forEach(url => {
-        const img = document.createElement('img');
-        img.src = url;
-        img.style.maxHeight = '120px';
-        img.style.margin = '5px';
-        img.style.borderRadius = '6px';
-        marketPreviewContainer.appendChild(img);
-      });
-    }
-    showPopup('📝 Product ready for editing.');
-  } catch (err) {
-    console.error('❌ editMarketItem error:', err);
-    showPopup('❌ Failed to load product for edit.');
-  }
-}
-
-// Delete product
-async function deleteMarketItem(id, title) {
-  if (!confirm(`Delete "${title}"?`)) return;
-  try {
-    const { error } = await client.from('market').delete().eq('id', id);
     if (error) throw error;
-    showPopup(`🗑️ Deleted ${title}`);
-    await loadMarketItems();
-  } catch (err) {
-    console.error('❌ deleteMarketItem error:', err);
-    showPopup('❌ Delete failed!');
-  }
-}
 
-// Attach marketplace form listener
-const marketFormEl = document.getElementById('marketForm');
-if (marketFormEl) {
-  marketFormEl.addEventListener('submit', e => {
-    e.preventDefault();
-    handleMarketSave();
-  });
-}
-// ============================
-// Attach Section Forms (generic) — remove "market" here
-// ============================
-function attachSectionForms() {
-  ['home', 'campus', 'academic', 'pdf'].forEach(section => {
-    const form = document.getElementById(section + 'Form');
-    if (form) {
-      form.removeEventListener && form.removeEventListener('submit', form._handler);
-      const handler = (e) => { e.preventDefault(); handleSave(section); };
-      form.addEventListener('submit', handler);
-      form._handler = handler;
-      loadItems(section);
-    }
-  });
+    alert("✅ CBT question added");
+
+    // Reset fields
+    document.getElementById("cbtCourse").value = "";
+    document.getElementById("cbtQuestion").value = "";
+    document.getElementById("optA").value = "";
+    document.getElementById("optB").value = "";
+    document.getElementById("optC").value = "";
+    document.getElementById("optD").value = "";
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ CBT failed: " + err.message);
+  }
 }
 </script>
 </body>
