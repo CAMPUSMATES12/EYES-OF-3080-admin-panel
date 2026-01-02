@@ -1,0 +1,42 @@
+{
+  "name": "EYES OF 3080",
+  "short_name": "EYES3080",
+  "description": "Latest news, course PDFs and CBT practice for students",
+
+  "start_url": "/EYES-OF-3080/admin.html",
+  "scope": "/EYES-OF-3080/",
+
+  "display": "standalone",
+  "background_color": "#f4f6f5",
+  "theme_color": "#2d5016",
+  "orientation": "portrait-primary",
+
+  "icons": [
+    {
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
