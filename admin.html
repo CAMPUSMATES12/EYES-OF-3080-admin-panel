@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel | EYES OF 3080</title>
 
-l
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -64,8 +63,41 @@ button{
 }
 button:hover{opacity:.9}
 
-
-
+/* ================= NOTIFICATION CARD ================= */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #2d5016;
+  color: #fff;
+  padding: 16px 22px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 280px;
+  max-width: 350px;
+  z-index: 5000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s ease;
+}
+.notification.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.notification.success { background: #2d7a2d; }
+.notification.error { background: #c0392b; }
+.notification.info { background: #2980b9; }
+.notification .close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 12px;
+}
 </style>
 </head>
 
@@ -81,6 +113,24 @@ button:hover{opacity:.9}
 <div class="container">
 <h1>Dashboard</h1>
 
+<!-- ================= NOTIFICATION CARD ================= -->
+<div id="notification" class="notification">
+  <span id="notificationMessage">Notification text</span>
+  <button class="close-btn" onclick="hideNotification()">×</button>
+</div>
+
+<!-- ================= NOTIFICATIONS ================= -->
+<div class="section">
+  <h2>Send Notification</h2>
+  <textarea id="notificationInput" placeholder="Type your notification here"></textarea>
+  <select id="notificationType">
+    <option value="success">Success</option>
+    <option value="error">Error</option>
+    <option value="info">Info</option>
+  </select>
+  <button onclick="sendNotification()">Publish Notification</button>
+</div>
+
 <!-- NEWS -->
 <div class="section">
 <h2>Publish News</h2>
@@ -93,19 +143,15 @@ button:hover{opacity:.9}
 <!-- PDF / COURSE FILES -->
 <div class="section">
   <h2>Upload Course PDF</h2>
-
-  <!-- Course code (admin types only this) -->
 <input
   id="courseCode"
   placeholder="Course Code (e.g BIO101)"
   onblur="loadCourseDetails()"
 >
-
 <input
   id="courseTitle"
   placeholder="Course Title"
 >
-
 <select id="courseLevel">
   <option value="">Select Level</option>
   <option value="100">100 Level</option>
@@ -114,24 +160,21 @@ button:hover{opacity:.9}
   <option value="400">400 Level</option>
   <option value="jupeb">JUPEB</option>
 </select>
-
-  <input
+<input
     id="fileTitle"
     placeholder="File Title (e.g Lecture Notes)"
-  >
-
-  <input
+>
+<input
     type="file"
     id="pdfFile"
     accept="application/pdf"
-  >
-
-  <button onclick="uploadCourseFile()">Upload PDF</button>
+>
+<button onclick="uploadCourseFile()">Upload PDF</button>
 </div>
 
 <!-- CBT -->
 <div class="section">
-<h2> Add CBT Question</h2>
+<h2>Add CBT Question</h2>
 <input id="cbtCourse" placeholder="Course code">
 <textarea id="cbtQuestion" placeholder="Question"></textarea>
 <input id="optA" placeholder="Option A">
@@ -157,6 +200,57 @@ const supabaseClient = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2bm92b2NvYXlxb21kaWxpZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMDM2OTgsImV4cCI6MjA3OTU3OTY5OH0.PcpwASQ3RBRoQVIglxKz-yM3iuYMZMtyQJBh8QNHad8"
 );
 
+
+/* ================= NOTIFICATION FUNCTIONS ================= */
+function showNotification(message, type = "success") {
+  const notif = document.getElementById("notification");
+  const msg = document.getElementById("notificationMessage");
+  msg.textContent = message;
+  notif.className = `notification show ${type}`;
+  setTimeout(() => {
+    notif.classList.remove("show");
+  }, 5000);
+}
+
+function hideNotification() {
+  document.getElementById("notification").classList.remove("show");
+}
+
+
+
+/* ================= SIMPLE ADMIN JS ================= */
+async function sendNotification() {
+  try {
+    const title = document.getElementById("notificationType").value || "Announcement";
+    const message = document.getElementById("notificationInput").value.trim();
+
+    if (!message) {
+      alert("Please type a notification message");
+      return;
+    }
+
+    // Insert notification into notifications table only
+    const { data, error } = await supabaseClient
+      .from("notifications")
+      .insert([{ title, message }])
+      .select()
+      .maybeSingle(); // safer than single()
+
+    if (error) throw error;
+
+    alert("✅ Notification posted successfully!");
+
+    // Reset input
+    document.getElementById("notificationInput").value = "";
+    document.getElementById("notificationType").value = "announcement";
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Failed to post notification: " + err.message);
+  }
+}
+
+
 /* ================= LOAD COURSE DETAILS ================= */
 async function loadCourseDetails() {
   const code = document.getElementById("courseCode").value.trim().toUpperCase();
@@ -165,20 +259,18 @@ async function loadCourseDetails() {
 
   if (!code) return;
 
-  const { data, error } = await supabaseClient
+  const { data } = await supabaseClient
     .from("courses")
     .select("*")
     .eq("course_code", code)
     .single();
 
   if (data) {
-    // Course exists
     titleInput.value = data.course_title;
     levelSelect.value = data.level || "";
     titleInput.readOnly = true;
     levelSelect.disabled = true;
   } else {
-    // New course
     titleInput.value = "";
     levelSelect.value = "";
     titleInput.readOnly = false;
@@ -189,17 +281,20 @@ async function loadCourseDetails() {
 /* ================= UPLOAD COURSE FILE ================= */
 async function uploadCourseFile() {
   try {
+    // Grab inputs from HTML
     const courseCode = document.getElementById("courseCode").value.trim().toUpperCase();
     const courseTitle = document.getElementById("courseTitle").value.trim();
     const fileTitle = document.getElementById("fileTitle").value.trim();
+    const level = document.getElementById("level").value.trim(); // ✅ new
     const file = document.getElementById("pdfFile").files[0];
 
-    if (!courseCode || !courseTitle || !fileTitle || !file) {
-      alert("Please fill all required fields");
+    // Validation
+    if (!courseCode || !courseTitle || !fileTitle || !file || !level) {
+      showNotification("Please fill all required fields", "error");
       return;
     }
 
-    // Upsert course using course_code as unique key
+    // Upsert course to ensure it exists
     const { data: course, error: courseError } = await supabaseClient
       .from("courses")
       .upsert(
@@ -211,7 +306,7 @@ async function uploadCourseFile() {
 
     if (courseError) throw courseError;
 
-    // Upload PDF to Supabase storage
+    // Prepare file upload
     const fileName = `courses/${course.course_code}/${Date.now()}-${file.name}`;
     const { error: uploadError } = await supabaseClient
       .storage
@@ -220,34 +315,37 @@ async function uploadCourseFile() {
 
     if (uploadError) throw uploadError;
 
+    // Get public URL
     const fileUrl = supabaseClient
       .storage
       .from("uploads")
       .getPublicUrl(fileName).data.publicUrl;
 
-    // Save file record (without level)
+    // Insert course file record with level
     const { error: saveError } = await supabaseClient
       .from("course_files")
       .insert({
         course_code: course.course_code,
         title: fileTitle,
-        file_url: fileUrl
+        file_url: fileUrl,
+        level: level // ✅ added
       });
 
     if (saveError) throw saveError;
 
-    alert("✅ PDF uploaded successfully");
+    // Success notification
+    showNotification("✅ PDF uploaded successfully", "success");
 
-    // Reset fields
+    // Reset inputs
     document.getElementById("fileTitle").value = "";
     document.getElementById("pdfFile").value = "";
+    document.getElementById("level").value = ""; // reset level
 
   } catch (err) {
     console.error(err);
-    alert("❌ PDF upload failed: " + err.message);
+    showNotification("❌ PDF upload failed: " + err.message, "error");
   }
 }
-
 
 /* ================= NEWS ================= */
 async function uploadNews() {
@@ -257,17 +355,15 @@ async function uploadNews() {
     const image = document.getElementById("newsImage").files[0];
 
     if (!title || !content) {
-      alert("Title and content are required");
+      showNotification("Title and content are required", "error");
       return;
     }
 
     let imageUrl = null;
-
     if (image) {
       const fileName = `news/${Date.now()}-${image.name}`;
       const { error } = await supabaseClient.storage.from("uploads").upload(fileName, image);
       if (error) throw error;
-
       imageUrl = supabaseClient.storage.from("uploads").getPublicUrl(fileName).data.publicUrl;
     }
 
@@ -279,16 +375,15 @@ async function uploadNews() {
 
     if (error) throw error;
 
-    alert("✅ News published successfully");
+    showNotification("✅ News published successfully", "success");
 
-    // Reset fields
     document.getElementById("newsTitle").value = "";
     document.getElementById("newsContent").value = "";
     document.getElementById("newsImage").value = "";
 
   } catch (err) {
     console.error(err);
-    alert("❌ News upload failed: " + err.message);
+    showNotification("❌ News upload failed: " + err.message, "error");
   }
 }
 
@@ -304,7 +399,7 @@ async function addCBT() {
     const answer = document.getElementById("cbtAnswer").value;
 
     if (!course || !question || !a || !b || !c || !d) {
-      alert("Fill all CBT fields");
+      showNotification("Fill all CBT fields", "error");
       return;
     }
 
@@ -317,9 +412,8 @@ async function addCBT() {
 
     if (error) throw error;
 
-    alert("✅ CBT question added");
+    showNotification("✅ CBT question added", "success");
 
-    // Reset fields
     document.getElementById("cbtCourse").value = "";
     document.getElementById("cbtQuestion").value = "";
     document.getElementById("optA").value = "";
@@ -329,9 +423,9 @@ async function addCBT() {
 
   } catch (err) {
     console.error(err);
-    alert("❌ CBT failed: " + err.message);
+    showNotification("❌ CBT failed: " + err.message, "error");
   }
 }
 </script>
 </body>
-</html>
+</html></html>
