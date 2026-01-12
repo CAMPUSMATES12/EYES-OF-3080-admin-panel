@@ -143,53 +143,80 @@ button:hover{opacity:.9}
 <!-- PDF / COURSE FILES -->
 <div class="section">
   <h2>Upload Course PDF</h2>
-<input
-  id="courseCode"
-  placeholder="Course Code (e.g BIO101)"
-  onblur="loadCourseDetails()"
->
-<input
-  id="courseTitle"
-  placeholder="Course Title"
->
-<select id="courseLevel">
-  <option value="">Select Level</option>
-  <option value="100">100 Level</option>
-  <option value="200">200 Level</option>
-  <option value="300">300 Level</option>
-  <option value="400">400 Level</option>
-  <option value="jupeb">JUPEB</option>
-</select>
-<input
+
+  <input
+    id="courseCode"
+    placeholder="Course Code (e.g BIO101)"
+    onblur="loadCourseDetails()"
+  >
+
+  <input
+    id="courseTitle"
+    placeholder="Course Title"
+  >
+
+  <select id="courseLevel">
+    <option value="">Select Level</option>
+    <option value="100">100 Level</option>
+    <option value="200">200 Level</option>
+    <option value="300">300 Level</option>
+    <option value="400">400 Level</option>
+    <option value="jupeb">JUPEB</option>
+  </select>
+
+  <input
     id="fileTitle"
     placeholder="File Title (e.g Lecture Notes)"
->
-<input
+  >
+
+  <input
     type="file"
     id="pdfFile"
     accept="application/pdf"
->
-<button onclick="uploadCourseFile()">Upload PDF</button>
+  >
+
+  <button onclick="uploadCourseFile()">Upload PDF</button>
 </div>
 
-<!-- CBT -->
+
+<!-- ================= CBT BULK UPLOAD ================= -->
 <div class="section">
-<h2>Add CBT Question</h2>
-<input id="cbtCourse" placeholder="Course code">
-<textarea id="cbtQuestion" placeholder="Question"></textarea>
-<input id="optA" placeholder="Option A">
-<input id="optB" placeholder="Option B">
-<input id="optC" placeholder="Option C">
-<input id="optD" placeholder="Option D">
-<select id="cbtAnswer">
-<option value="A">A</option>
-<option value="B">B</option>
-<option value="C">C</option>
-<option value="D">D</option>
-</select>
-<button onclick="addCBT()">Add Question</button>
-</div>
+  <h2>Upload CBT Questions (CSV)</h2>
 
+  <input
+    id="cbtCsvCourse"
+    placeholder="Course Code (e.g BIO101)"
+  >
+
+  <input
+    id="cbtCsvLevel"
+    placeholder="Level (e.g 100, 200, jupeb)"
+  >
+
+  <!-- NEW: FILE TITLE -->
+  <input
+    id="cbtCsvFileTitle"
+    placeholder="File Title (e.g Reproduction, Genetics)"
+  >
+
+  <!-- File upload -->
+  <input
+    type="file"
+    id="cbtCsvFile"
+    accept=".csv"
+  >
+
+  <!-- ✅ NEW: Textarea for CSV text -->
+  <textarea
+    id="cbtCsvText"
+    rows="10"
+    cols="60"
+    placeholder="Or paste CSV text here..."
+    style="margin-top:10px;"
+  ></textarea>
+
+  <br>
+  <button onclick="uploadCBTcsv()">Upload CSV</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -281,33 +308,35 @@ async function loadCourseDetails() {
 /* ================= UPLOAD COURSE FILE ================= */
 async function uploadCourseFile() {
   try {
-    // Grab inputs from HTML
     const courseCode = document.getElementById("courseCode").value.trim().toUpperCase();
     const courseTitle = document.getElementById("courseTitle").value.trim();
+    const level = document.getElementById("courseLevel").value;
     const fileTitle = document.getElementById("fileTitle").value.trim();
-    const level = document.getElementById("level").value.trim(); // ✅ new
     const file = document.getElementById("pdfFile").files[0];
 
-    // Validation
-    if (!courseCode || !courseTitle || !fileTitle || !file || !level) {
-      showNotification("Please fill all required fields", "error");
+    if (!courseCode || !courseTitle || !level || !fileTitle || !file) {
+      showNotification("Please fill all fields", "error");
       return;
     }
 
-    // Upsert course to ensure it exists
+    /* 🔹 UPSERT COURSE (LEVEL LIVES HERE) */
     const { data: course, error: courseError } = await supabaseClient
       .from("courses")
       .upsert(
-        { course_code: courseCode, course_title: courseTitle },
-        { onConflict: 'course_code' }
+        {
+          course_code: courseCode,
+          course_title: courseTitle,
+          level: level
+        },
+        { onConflict: "course_code" }
       )
       .select()
       .single();
 
     if (courseError) throw courseError;
 
-    // Prepare file upload
-    const fileName = `courses/${course.course_code}/${Date.now()}-${file.name}`;
+    /* 🔹 UPLOAD FILE */
+    const fileName = `courses/${courseCode}/${Date.now()}-${file.name}`;
     const { error: uploadError } = await supabaseClient
       .storage
       .from("uploads")
@@ -315,35 +344,30 @@ async function uploadCourseFile() {
 
     if (uploadError) throw uploadError;
 
-    // Get public URL
     const fileUrl = supabaseClient
       .storage
       .from("uploads")
       .getPublicUrl(fileName).data.publicUrl;
 
-    // Insert course file record with level
-    const { error: saveError } = await supabaseClient
+    /* 🔹 SAVE FILE RECORD (NO LEVEL HERE) */
+    const { error: fileError } = await supabaseClient
       .from("course_files")
       .insert({
-        course_code: course.course_code,
+        course_code: courseCode,
         title: fileTitle,
-        file_url: fileUrl,
-        level: level // ✅ added
+        file_url: fileUrl
       });
 
-    if (saveError) throw saveError;
+    if (fileError) throw fileError;
 
-    // Success notification
-    showNotification("✅ PDF uploaded successfully", "success");
+    showNotification("✅ Course PDF uploaded successfully", "success");
 
-    // Reset inputs
     document.getElementById("fileTitle").value = "";
     document.getElementById("pdfFile").value = "";
-    document.getElementById("level").value = ""; // reset level
 
   } catch (err) {
     console.error(err);
-    showNotification("❌ PDF upload failed: " + err.message, "error");
+    showNotification("❌ Upload failed: " + err.message, "error");
   }
 }
 
@@ -388,44 +412,103 @@ async function uploadNews() {
 }
 
 /* ================= CBT ================= */
-async function addCBT() {
+async function uploadCBTcsv() {
   try {
-    const course = document.getElementById("cbtCourse").value.trim().toUpperCase();
-    const question = document.getElementById("cbtQuestion").value.trim();
-    const a = document.getElementById("optA").value.trim();
-    const b = document.getElementById("optB").value.trim();
-    const c = document.getElementById("optC").value.trim();
-    const d = document.getElementById("optD").value.trim();
-    const answer = document.getElementById("cbtAnswer").value;
+    const course = document.getElementById("cbtCsvCourse").value.trim().toUpperCase();
+    let level = document.getElementById("cbtCsvLevel").value.trim();
+    const fileTitle = document.getElementById("cbtCsvFileTitle")?.value.trim();
+    const fileInput = document.getElementById("cbtCsvFile");
+    const csvTextInput = document.getElementById("cbtCsvText")?.value.trim(); // optional pasted text
 
-    if (!course || !question || !a || !b || !c || !d) {
-      showNotification("Fill all CBT fields", "error");
+    // Validation
+    if (!course || !fileTitle) {
+      showNotification("Please fill course code and file title", "error");
       return;
     }
 
-    const { error } = await supabaseClient.from("cbt_questions").insert({
-      course,
-      question,
-      a, b, c, d,
-      answer
+    // Get CSV content from pasted text OR uploaded file
+    let csvContent = "";
+    if (csvTextInput) {
+      csvContent = csvTextInput;
+    } else if (fileInput.files.length > 0) {
+      csvContent = await fileInput.files[0].text();
+    } else {
+      showNotification("Please upload a CSV file or paste CSV text", "error");
+      return;
+    }
+
+    // AUTO GET LEVEL IF EMPTY
+    if (!level) {
+      const { data, error } = await supabaseClient
+        .from("courses")
+        .select("level")
+        .eq("course_code", course)
+        .single();
+
+      if (error || !data?.level) {
+        showNotification("Level not found for this course. Please enter it manually.", "error");
+        return;
+      }
+      level = data.level;
+    }
+
+    // PARSE CSV
+    const rows = csvContent.split("\n").map(r => r.trim()).filter(Boolean);
+    const questions = [];
+
+    rows.forEach((row, index) => {
+      const cols = row.split(",").map(c => c.trim());
+      if (cols.length < 5) return; // Require question + 4 options + answer
+
+      const questionText = cols[0];
+      const optionA = cols[1];
+      const optionB = cols[2];
+      const optionC = cols[3];
+      const optionD = cols[4];
+      const correctAnswer = cols[5] || optionA; // fallback to first option if missing
+
+      questions.push({
+        course_code: course,
+        level,
+        file_title: fileTitle,
+        question: questionText,
+        option_a: optionA,
+        option_b: optionB,
+        option_c: optionC,
+        option_d: optionD,
+        correct_option: correctAnswer
+      });
     });
+
+    if (questions.length === 0) {
+      showNotification("No valid questions found in CSV/text", "error");
+      return;
+    }
+
+    // SAVE TO SUPABASE
+    const { error } = await supabaseClient
+      .from("cbt_questions")
+      .insert(questions);
 
     if (error) throw error;
 
-    showNotification("✅ CBT question added", "success");
+    showNotification(`✅ ${questions.length} CBT questions uploaded successfully`, "success");
 
-    document.getElementById("cbtCourse").value = "";
-    document.getElementById("cbtQuestion").value = "";
-    document.getElementById("optA").value = "";
-    document.getElementById("optB").value = "";
-    document.getElementById("optC").value = "";
-    document.getElementById("optD").value = "";
+    // RESET INPUTS
+    document.getElementById("cbtCsvCourse").value = "";
+    document.getElementById("cbtCsvLevel").value = "";
+    document.getElementById("cbtCsvFileTitle").value = "";
+    document.getElementById("cbtCsvFile").value = "";
+    if (document.getElementById("cbtCsvText")) {
+      document.getElementById("cbtCsvText").value = "";
+    }
 
   } catch (err) {
     console.error(err);
-    showNotification("❌ CBT failed: " + err.message, "error");
+    showNotification("❌ Failed to upload CSV/text: " + err.message, "error");
   }
 }
 </script>
 </body>
-</html></html>
+</body>
+</html>
